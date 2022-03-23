@@ -5,22 +5,22 @@ import sqlite3 as sl
 from PrintingUtils import printSetName, printSetProperties, printEmptyLine, printStartOfSubperiod, printEndOfSubperiod, printMoneyAfterChange, printMoneyAfterAllChangesAccordingToMyStrategy, printMoneyAfterAllChangesAccordingToMyStrategyAsPercentage, printMyStrategyMinusAverageChange
 from CalculationUtils import calculateChangeInSharePrice, calculateChangeInInvestedMoney, calculateChangeForBetsMadeForGivenCompaniesInParticularPeriod, calculateAverageChangeForGivenCompaniesInParticularPeriod
 from DateUtils import splitWholePeriodIntoChunks
-from ApiUtils import fetchDataFromApi, fetchIncomeStatementsFromTheApi, fetchSharePricesFromTheApi
-from DatabaseUtils import initializeDatabase, saveFetchedDataIntoDatabase_incomeStatements, saveFetchedDataIntoDatabase_sharePrices, readAllDataFromDatabase
+from ApiUtils import fetchDataFromApi, fetchIncomeStatementsFromTheApi, fetchSharePricesFromTheApi, fetchCompanyOutlookFromTheApi
+from DatabaseUtils import initializeDatabase, saveFetchedDataIntoDatabase_incomeStatements, saveFetchedDataIntoDatabase_sharePrices, readAllDataFromDatabase, saveFetchedDataIntoDatabase_companyOutlook
 from SavingToTxtUtils import writeResultIntoTxtLog_setName, writeResultIntoTxtLog_periods, writeResultIntoTxtLog_results
-from Constants import DATE_FORMAT, COMPANIES_TICKERS_TEST, COMPANIES_TICKERS_BIG_THREE, COMPANIES_TICKERS_BIG_FOUR, COMPANIES_TICKERS_TESLA, COMPANIES_TICKERS_TESLA_APPLE, COMPANIES_TICKERS_MULTISET
+from Constants import DATE_FORMAT, COMPANIES_TICKERS_TEST, COMPANIES_TICKERS_TEST_2, XXX, COMPANIES_TICKERS_BIG_THREE, COMPANIES_TICKERS_BIG_FOUR, COMPANIES_TICKERS_TESLA, COMPANIES_TICKERS_TESLA_APPLE, COMPANIES_TICKERS_MULTISET
 from WeightsFactory import getWeightsForBetsForGivenCompaniesForGivenDate
 
 
-COMPANIES_SET = COMPANIES_TICKERS_TEST
+COMPANIES_SET = COMPANIES_TICKERS_TEST_2
 
-SHARE_PRICES_FETCHING_START_DATE = '2016-01-01'
+SHARE_PRICES_FETCHING_START_DATE = '2021-03-01'
 SHARE_PRICES_FETCHING_END_DATE = '2022-03-01'
 
-START_DATE = '2016-03-01'
+START_DATE = '2021-03-01'
 END_DATE = '2022-03-01'
 
-SUBPERIOD_LENGTH_IN_DAYS_ARRAY = [5]
+SUBPERIOD_LENGTH_IN_DAYS_ARRAY = [10]
 
 
 ATTRIBUTE_OF_DECISION_INDEX = 3
@@ -86,8 +86,11 @@ def runMultiplePeriodSimulation(companies, startDate, endDate, attributeOfDecisi
 def fetchNecessaryDataForExperiment(companies):
     initializeDatabase()
 
-    data = fetchIncomeStatementsFromTheApi(companies)
-    saveFetchedDataIntoDatabase_incomeStatements(data, False)
+    data = fetchCompanyOutlookFromTheApi(companies)
+    saveFetchedDataIntoDatabase_companyOutlook(data, False)
+
+    # data = fetchIncomeStatementsFromTheApi(companies)
+    # saveFetchedDataIntoDatabase_incomeStatements(data, False)
 
     sharePricesData = fetchSharePricesFromTheApi(companies, SHARE_PRICES_FETCHING_START_DATE, SHARE_PRICES_FETCHING_END_DATE)
     saveFetchedDataIntoDatabase_sharePrices(sharePricesData, DATE_FORMAT, False)

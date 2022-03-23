@@ -13,6 +13,43 @@ COMPANIES_TICKERS_TEST = [
     'VZ'
 ]
 
+XXX = [
+'TMUS', 'INTU', 'AMAT'
+]
+
+COMPANIES_TICKERS_TEST_2 = [
+    'AAPL',
+    'AMZN',
+    'FB',
+    'GOOGL',
+    'IBM',
+    'MSFT',
+    'NFLX',
+    'NVDA',
+    'PYPL',
+    'VZ',
+
+    'TSLA',
+    'FDX',
+    'NKE',
+    'MCD',
+    'SQ',
+
+    # 'COST',
+    'PEP',
+    'ADBE',
+    'TXN',
+    # 'AVGO'
+    'INTC',
+    'QCOM',
+    'AMGN',
+    'HON',
+
+    'TMUS',
+    'INTU',
+    'AMAT'
+]
+
 COMPANIES_TICKERS_BIG_THREE = [
     'AAPL',
     'FB',

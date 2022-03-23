@@ -5,10 +5,15 @@ from PrintingUtils import printErrorSavingIntoDatabase
 
 
 SQL_QUERY_CREATE_TABLE_INCOME_STATEMENTS = """CREATE TABLE IF NOT EXISTS INCOME_STATEMENT (ticker TEXT, currency TEXT, fillingDate DATE, eps FLOAT, epsDiluted FLOAT, PRIMARY KEY (ticker, fillingDate));"""
+SQL_QUERY_CREATE_TABLE_COMPANY_OUTLOOK = """CREATE TABLE IF NOT EXISTS COMPANY_OUTLOOK (ticker TEXT, fillingDate DATE, currency TEXT, freeCashFlow FLOAT, amountOfShares INT, PRIMARY KEY (ticker, fillingDate));"""
 SQL_QUERY_CREATE_TABLE_SHARE_PRICES = """CREATE TABLE IF NOT EXISTS SHARE_PRICES (ticker TEXT, date DATE, currency TEXT, price FLOAT, PRIMARY KEY (ticker, date));"""
+
 SQL_QUERY_SAVE_INCOME_STATEMENTS = 'INSERT INTO INCOME_STATEMENT (ticker, currency, fillingDate, eps, epsDiluted) values(?, ?, ?, ?, ?)'
+SQL_QUERY_SAVE_COMPANY_OUTLOOK = 'INSERT INTO COMPANY_OUTLOOK (ticker, fillingDate, currency, freeCashFlow, amountOfShares) values(?, ?, ?, ?, ?)'
 SQL_QUERY_SAVE_SHARE_PRICES = 'INSERT INTO SHARE_PRICES (ticker, date, currency, price) values(?, ?, ?, ?)'
+
 SQL_QUERY_READ_ALL_INCOME_STATEMENTS = 'SELECT * FROM INCOME_STATEMENT'
+SQL_QUERY_READ_ALL_COMPANY_OUTLOOK = 'SELECT * FROM COMPANY_OUTLOOK'
 SQL_QUERY_READ_ALL_SHARE_PRICES = 'SELECT * FROM SHARE_PRICES'
 
 
@@ -16,7 +21,21 @@ def initializeDatabase():
     con = sl.connect('database.db')
     with con:
         con.execute(SQL_QUERY_CREATE_TABLE_INCOME_STATEMENTS)
+        con.execute(SQL_QUERY_CREATE_TABLE_COMPANY_OUTLOOK)
         con.execute(SQL_QUERY_CREATE_TABLE_SHARE_PRICES)
+
+
+def saveFetchedDataIntoDatabase_companyOutlook(data, debugMode = False):
+    for report in data:
+        ticker = report[0]
+        fillingDate = report[1]
+        currency = report[2]
+        freeCashFlow = report[3]
+        amountOfShares = report[4]
+
+        sql = SQL_QUERY_SAVE_COMPANY_OUTLOOK
+        data = (ticker, fillingDate, currency, freeCashFlow, amountOfShares)
+        saveFetchedDataIntoDatabase(sql, data, debugMode)
 
 
 def saveFetchedDataIntoDatabase_incomeStatements(data, debugMode = False):
@@ -63,10 +82,23 @@ def readAllDataFromDatabase():
         print("DATABASE TEST: INCOME_STATEMENT")
         for row in data:
             print(row)
+        data = con.execute(SQL_QUERY_READ_ALL_COMPANY_OUTLOOK)
+        print("DATABASE TEST: COMPANY_OUTLOOK")
+        for row in data:
+            print(row)
         data = con.execute(SQL_QUERY_READ_ALL_SHARE_PRICES)
         print("DATABASE TEST: SHARE_PRICES")
         for row in data:
             print(row)
+
+
+def getMostRecentIncomeStatementForGivenCompanyForGivenDate_companyOutlook_nPeriods(numberOfPeriods, companyTicker, date, debugMode = False):
+    mostRecentIncomeStatementsForThisDate = []
+    con = sl.connect('database.db')
+    with con:
+        data = con.execute("SELECT * FROM COMPANY_OUTLOOK WHERE ticker = '" + companyTicker + "'" + " AND fillingDate <= '" + date + "' ORDER BY fillingDate DESC LIMIT '" + str(numberOfPeriods) + "'")
+        mostRecentIncomeStatementForThisDate = data.fetchall()
+    return mostRecentIncomeStatementForThisDate
 
 
 def getMostRecentIncomeStatementForGivenCompanyForGivenDate_nPeriods(numberOfPeriods, companyTicker, date, debugMode = False):
@@ -75,9 +107,6 @@ def getMostRecentIncomeStatementForGivenCompanyForGivenDate_nPeriods(numberOfPer
     with con:
         data = con.execute("SELECT * FROM INCOME_STATEMENT WHERE ticker = '" + companyTicker + "'" + " AND fillingDate <= '" + date + "' ORDER BY fillingDate DESC LIMIT 4")
         mostRecentIncomeStatementForThisDate = data.fetchall()
-        # if (debugMode):
-        #     print("DEBUG LOG: " + "MOST RECENT INCOME STATEMENT " + companyTicker)
-        #     print(mostRecentIncomeStatementForThisDate)
     return mostRecentIncomeStatementForThisDate
 
 
@@ -87,9 +116,6 @@ def getMostRecentIncomeStatementForGivenCompanyForGivenDate(companyTicker, date,
     with con:
         data = con.execute("SELECT * FROM INCOME_STATEMENT WHERE ticker = '" + companyTicker + "'" + " AND fillingDate <= '" + date + "' ORDER BY fillingDate DESC LIMIT 1")
         mostRecentIncomeStatementForThisDate = data.fetchone()
-        # if (debugMode):
-        #     print("DEBUG LOG: " + "MOST RECENT INCOME STATEMENT " + companyTicker)
-        #     print(mostRecentIncomeStatementForThisDate)
     return mostRecentIncomeStatementForThisDate
 
 
@@ -97,7 +123,7 @@ def readSharePricesPerParticularPeriod(company, startDate, endDate):
     con = sl.connect('database.db')
     data = []
     with con:
-        data = con.execute("SELECT * FROM SHARE_PRICES WHERE ticker = '" + company + "' AND date >='" + startDate + "' AND date <='" + endDate +"'")
+        data = con.execute("SELECT * FROM SHARE_PRICES WHERE ticker = '" + company + "' AND date >='" + startDate + "' AND date <='" + endDate + "'")
     valuesToExport = []
     for row in data.fetchall():
         valuesToExport.append((row[1], row[3]))

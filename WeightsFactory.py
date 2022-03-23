@@ -1,6 +1,6 @@
 import sqlite3 as sl
 from DateUtils import increaseDateByDay
-from DatabaseUtils import readDbSharePriceInParticularDay, readSharePricesPerParticularPeriod, tryToFetchPricesInParticularPeriod, getMostRecentIncomeStatementForGivenCompanyForGivenDate, getMostRecentIncomeStatementForGivenCompanyForGivenDate_nPeriods
+from DatabaseUtils import readDbSharePriceInParticularDay, readSharePricesPerParticularPeriod, tryToFetchPricesInParticularPeriod, getMostRecentIncomeStatementForGivenCompanyForGivenDate, getMostRecentIncomeStatementForGivenCompanyForGivenDate_nPeriods, getMostRecentIncomeStatementForGivenCompanyForGivenDate_companyOutlook_nPeriods
 from Constants import DATE_FORMAT
 from PrintingUtils import printCompanyName, printAverageWeight, printRecalculatedNormalizedWeight, printInvestmentValueCalculations, printNormalizedWeight
 
@@ -23,6 +23,7 @@ def calculateAverageInvestmentValueInThisDateForGivenCompanies(companies, attrib
     result = result + " " + str(averageInvestmentValue)
     print(result)
 
+
 # New approach
 def getWeightsForBetsForGivenCompaniesForGivenDate_betThatOverpricedWillDropAndUnderpricedWillRaise(companies, attributeOfDecisionIndex, givenDate, debugMode):
     calculatedWeights = []
@@ -30,7 +31,7 @@ def getWeightsForBetsForGivenCompaniesForGivenDate_betThatOverpricedWillDropAndU
     sumOfWeights = 0.0
 
     for companyTicker in companies:
-        weight = getInvestmentValueForGivenCompanyForGivenDate(companyTicker, attributeOfDecisionIndex, givenDate, debugMode)
+        weight = getInvestmentValueForGivenCompanyForGivenDate_nPeriods(INVESTMENT_VALUE_NUMBER_OF_PERIODS, companyTicker, attributeOfDecisionIndex, givenDate, debugMode)
 
         if (weight > 0):
             calculatedWeights.append((companyTicker, weight))
@@ -74,7 +75,7 @@ def getWeightsForBetsForGivenCompaniesForGivenDate_buyAllJustLessOfOverpricedAnd
     sumOfWeights = 0.0
 
     for companyTicker in companies:
-        weight = getInvestmentValueForGivenCompanyForGivenDate(companyTicker, attributeOfDecisionIndex, givenDate, debugMode)
+        weight = getInvestmentValueForGivenCompanyForGivenDate_nPeriods(INVESTMENT_VALUE_NUMBER_OF_PERIODS, companyTicker, attributeOfDecisionIndex, givenDate, debugMode)
 
         if (weight > 0):
             calculatedWeights.append((companyTicker, weight))
@@ -97,15 +98,20 @@ def getWeightsForBetsForGivenCompaniesForGivenDate_buyAllJustLessOfOverpricedAnd
 
 
 def getInvestmentValueForGivenCompanyForGivenDate_nPeriods(numberOfPeriods, companyTicker, attributeOfDecisionIndex, date, debugMode = False):
-    mostRecentIncomeStatementsForThisDate = getMostRecentIncomeStatementForGivenCompanyForGivenDate_nPeriods(numberOfPeriods, companyTicker, date, debugMode)
+    # mostRecentIncomeStatementsForThisDate = getMostRecentIncomeStatementForGivenCompanyForGivenDate_nPeriods(numberOfPeriods, companyTicker, date, debugMode)
+    mostRecentIncomeStatementsForThisDate = getMostRecentIncomeStatementForGivenCompanyForGivenDate_companyOutlook_nPeriods(numberOfPeriods, companyTicker, date, debugMode)
     if mostRecentIncomeStatementsForThisDate == []:
         print("ERROR: Empty list.")
         return None
     else:
-
         averageAttributeOfDecisionValue = 0.0
         for incomeStatement in mostRecentIncomeStatementsForThisDate:
-            averageAttributeOfDecisionValue = averageAttributeOfDecisionValue + incomeStatement[attributeOfDecisionIndex]
+
+            # Todo: Refactor
+            indexOfAmountOfShares = 4
+            decisionValue = incomeStatement[attributeOfDecisionIndex] / incomeStatement[indexOfAmountOfShares]
+            averageAttributeOfDecisionValue = averageAttributeOfDecisionValue + decisionValue
+
         averageAttributeOfDecisionValue = averageAttributeOfDecisionValue / len(mostRecentIncomeStatementsForThisDate)
 
         # attributeOfDecisionValue = mostRecentIncomeStatementsForThisDate[0][attributeOfDecisionIndex]
@@ -123,27 +129,4 @@ def getInvestmentValueForGivenCompanyForGivenDate_nPeriods(numberOfPeriods, comp
 
         investmentValue = averageAttributeOfDecisionValue / sharePriceForThisDate
         printInvestmentValueCalculations(companyTicker, averageAttributeOfDecisionValue, sharePriceForThisDate, investmentValue, debugMode)
-        return investmentValue
-
-
-def getInvestmentValueForGivenCompanyForGivenDate(companyTicker, attributeOfDecisionIndex, date, debugMode = False):
-    mostRecentIncomeStatementForThisDate = getMostRecentIncomeStatementForGivenCompanyForGivenDate(companyTicker, date, debugMode)
-    if mostRecentIncomeStatementForThisDate == None:
-        return None
-    else:
-        attributeOfDecisionValue = mostRecentIncomeStatementForThisDate[attributeOfDecisionIndex]
-        sharePriceForThisDate = None
-        date_variable = date
-
-        # I want to try to increase 4 times, on 5th attempt - print error. The loop works in 0 - (n-1) range.
-        AMOUNT_OF_DATE_INCREASE_TRIES = 4
-        for i in range(0, (AMOUNT_OF_DATE_INCREASE_TRIES + 1)):
-            sharePriceForThisDate = readDbSharePriceInParticularDay(companyTicker, date_variable, debugMode)
-            if (sharePriceForThisDate == None):
-                date_variable = increaseDateByDay(date_variable, DATE_FORMAT, debugMode)
-            else:
-                break
-
-        investmentValue = attributeOfDecisionValue / sharePriceForThisDate
-        printInvestmentValueCalculations(companyTicker, attributeOfDecisionValue, sharePriceForThisDate, investmentValue, debugMode)
         return investmentValue
