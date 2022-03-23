@@ -2,31 +2,31 @@ from pathlib import Path
 import os
 
 
-def checkIfTxtLogExists(outputDir):
-    logFilePath = Path(outputDir + 'log.txt')
-    if logFilePath.is_file() == False:
-        os.system("mkdir " + outputDir)
-        os.system("touch " + str(logFilePath))
+def check_if_txt_log_exists(output_dir):
+    log_file_path = Path(output_dir + 'log.txt')
+    if log_file_path.is_file() == False:
+        os.system("mkdir " + output_dir)
+        os.system("touch " + str(log_file_path))
 
 
-def writeResultIntoTxtLog_set_name(outputDir, set_name = ""):
-    checkIfTxtLogExists(outputDir)
-    with open((outputDir + 'log.txt'),'a') as f:
+def write_result_into_txt_log_set_name(output_dir, set_name = ""):
+    check_if_txt_log_exists(output_dir)
+    with open((output_dir + 'log.txt'),'a') as f:
         f.write("\n")
         f.write(set_name + "\n")
 
 
-def writeResultIntoTxtLog_periods(outputDir, wholePeriodLength, subPeriodLength):
-    checkIfTxtLogExists(outputDir)
-    with open((outputDir + 'log.txt'),'a') as f:
-        if (wholePeriodLength != None):
-            f.write("WHOLE PERIOD LENGTH: " + wholePeriodLength + "\n")
-        f.write("SUB-PERIOD LENGTH: " + str(subPeriodLength) + "\n")
+def write_result_into_txt_log_periods(output_dir, whole_period_length, sub_period_length):
+    check_if_txt_log_exists(output_dir)
+    with open((output_dir + 'log.txt'),'a') as f:
+        if (whole_period_length != None):
+            f.write("WHOLE PERIOD LENGTH: " + whole_period_length + "\n")
+        f.write("SUB-PERIOD LENGTH: " + str(sub_period_length) + "\n")
 
 
-def writeResultIntoTxtLog_results(outputDir, result, average_change):
-    checkIfTxtLogExists(outputDir)
-    with open((outputDir + 'log.txt'),'a') as f:
+def write_result_into_txt_log_results(output_dir, result, average_change):
+    check_if_txt_log_exists(output_dir)
+    with open((output_dir + 'log.txt'),'a') as f:
         f.write("MONEY AFTER ALL CHANGES ACCORDING TO MY STRATEGY IN PERCENTAGE: " + "{0:.2%}".format(result) + "\n")
         f.write("AVERAGE CHANGE OF GIVEN COMPANIES IN GIVEN PERIOD " + "{0:.2%}".format(average_change))
         f.write("\n\n")
