@@ -9,11 +9,11 @@ def checkIfTxtLogExists(outputDir):
         os.system("touch " + str(logFilePath))
 
 
-def writeResultIntoTxtLog_setName(outputDir, setName = ""):
+def writeResultIntoTxtLog_set_name(outputDir, set_name = ""):
     checkIfTxtLogExists(outputDir)
     with open((outputDir + 'log.txt'),'a') as f:
         f.write("\n")
-        f.write(setName + "\n")
+        f.write(set_name + "\n")
 
 
 def writeResultIntoTxtLog_periods(outputDir, wholePeriodLength, subPeriodLength):
@@ -24,9 +24,9 @@ def writeResultIntoTxtLog_periods(outputDir, wholePeriodLength, subPeriodLength)
         f.write("SUB-PERIOD LENGTH: " + str(subPeriodLength) + "\n")
 
 
-def writeResultIntoTxtLog_results(outputDir, result, averageChange):
+def writeResultIntoTxtLog_results(outputDir, result, average_change):
     checkIfTxtLogExists(outputDir)
     with open((outputDir + 'log.txt'),'a') as f:
         f.write("MONEY AFTER ALL CHANGES ACCORDING TO MY STRATEGY IN PERCENTAGE: " + "{0:.2%}".format(result) + "\n")
-        f.write("AVERAGE CHANGE OF GIVEN COMPANIES IN GIVEN PERIOD " + "{0:.2%}".format(averageChange))
+        f.write("AVERAGE CHANGE OF GIVEN COMPANIES IN GIVEN PERIOD " + "{0:.2%}".format(average_change))
         f.write("\n\n")
