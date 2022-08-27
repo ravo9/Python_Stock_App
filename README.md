@@ -3,7 +3,8 @@ PURPOSE:
 1. On the base of particular strategy/ calculation, the app assigns weights to set of companies and buys/ sells them accordingly.
 	Makes simulation and see wether it performs better than a simple investing in the same instruments over period of time 
   (like buying and holding long-term).
-  
+
+------------------------
 
 DEVELOPMENT NOTES (to be ordered if the project is to be continued):
 
@@ -34,7 +35,7 @@ Flaws and Limitations:
 		It is showing how the company performs in longer term, but also doesn’t reflect changes correctly (they’re minimised).
 
 
-Python Stock App - MAIN PLAN
+Python Stock App - MAIN PLAN:
 
 1. What I would like to test:
 	I would like to test whether the values of IntrinsicValue per 1 spent today dollar are fluctuating over time and crossing each other on the graph.
@@ -58,7 +59,7 @@ Python Stock App - MAIN PLAN
 		Filling date seems to be okay as according to stackexchange.com it's the date when the report is published.
 
 
-The Stock App 4 - Improvements
+The Stock App 4 - Improvements:
 
 1. Add comparison of values/ spent dollar with previous months
     1. We need to take into account that between the date month ago and today - there could be a quarter results release day.
@@ -77,6 +78,7 @@ The Stock App 4 - Improvements
     1. ABEPF
     2. DAI
     3. OCDO
+
 
 Next Steps:
 
