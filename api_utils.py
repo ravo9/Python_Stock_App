@@ -3,6 +3,7 @@ import pandas_datareader as web
 import pandas
 import json
 from printing_utils import print_api_data_fetched
+import yfinance as yf
 
 
 # 7 years
@@ -79,6 +80,7 @@ def fetch_income_statements_from_the_api(companies):
             apikey=api_key
             )
         data = fetch_data_from_api(url, params, False)
+        print(data)
         for row in data:
             all_companies_data.append(row)
     return all_companies_data
@@ -87,7 +89,7 @@ def fetch_income_statements_from_the_api(companies):
 def fetch_share_prices_from_the_api(companies, start_date, end_date):
     dataframes = []
     for company in companies:
-        share_prices_table = web.DataReader(company, data_source='yahoo', start=start_date, end=end_date)
+        share_prices_table = yf.download(company, start=start_date, end=end_date, progress=False)
         values = share_prices_table.filter(["High", "Low"])
         values = values.assign(Ticker=company)
         dataframes.append(values)

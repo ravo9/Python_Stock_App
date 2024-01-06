@@ -13,10 +13,6 @@ COMPANIES_TICKERS_TEST = [
     'VZ'
 ]
 
-XXX = [
-'MSFT', 'FB'
-]
-
 COMPANIES_TICKERS_TEST_2 = [
     'AAPL',
     'AMZN',
