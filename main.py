@@ -82,16 +82,21 @@ def run_multiple_period_simulation(companies, start_date, end_date, attribute_of
 def fetch_necessary_data_for_experiment(companies):
     initialize_database()
 
-    # Todo: Licence 29 USD required for this - find replacement.
+    # Todo: Licence 29 USD required for these - find replacement.
     # data = fetch_company_outlook_from_the_api(companies)
     # save_fetched_data_into_database_company_outlook(data, False)
-
-    # Todo: Licence 29 USD required for this - find replacement.
     # data = fetch_income_statements_from_the_api(companies)
     # save_fetched_data_into_database_income_statements(data, False)
 
-    share_prices_data = fetch_share_prices_from_the_api(companies, SHARE_PRICES_FETCHING_START_DATE, SHARE_PRICES_FETCHING_END_DATE)
-    save_fetched_data_into_database_share_prices(share_prices_data, DATE_FORMAT, False)
+    save_fetched_data_into_database_share_prices(
+        fetch_share_prices_from_the_api(
+            companies,
+            SHARE_PRICES_FETCHING_START_DATE,
+            SHARE_PRICES_FETCHING_END_DATE
+        ),
+        DATE_FORMAT,
+        False
+    )
 
     read_all_data_from_database()
 
