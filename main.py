@@ -2,13 +2,13 @@ from printing_utils import print_set_properties, print_empty_line, print_start_o
 from calculation_utils import calculate_change_for_bets_made_for_given_companies_in_particular_period, calculate_average_change_for_given_companies_in_particular_period
 from date_utils import split_whole_period_into_chunks
 from api_utils import fetch_share_prices_from_the_api
-from database_utils import initialize_database, save_fetched_data_into_database_share_prices, read_all_data_from_database, save_fetched_data_into_database_income_statements
+from database_utils import initialize_database, import_and_process_csv, save_fetched_data_into_database_share_prices, save_fetched_data_into_database_google_sheets_data, read_all_data_from_database
 from saving_to_txt_utils import write_result_into_txt_log_set_name, write_result_into_txt_log_periods, write_result_into_txt_log_results
-from constants import DATE_FORMAT, COMPANIES_TICKERS_TEST, COMPANIES_TICKERS_TEST_2, COMPANIES_TICKERS_BIG_THREE, COMPANIES_TICKERS_BIG_FOUR, COMPANIES_TICKERS_TESLA, COMPANIES_TICKERS_TESLA_APPLE, COMPANIES_TICKERS_MULTISET
+from constants import DATE_FORMAT, COMPANIES_TICKERS_TEST, COMPANIES_TICKERS_TEST_2, COMPANIES_TICKERS_BIG_THREE, COMPANIES_TICKERS_BIG_FOUR, COMPANIES_TICKERS_TESLA, COMPANIES_TICKERS_TESLA_APPLE, COMPANIES_TICKERS_MULTISET, COMPANIES_TICKERS_TESLA_DISNEY_META
 from weights_factory import get_weights_for_bets_for_given_companies_for_given_date
 
 
-COMPANIES_SET = COMPANIES_TICKERS_TESLA
+COMPANIES_SET = COMPANIES_TICKERS_TESLA_DISNEY_META
 
 SHARE_PRICES_FETCHING_START_DATE = '2021-03-01'
 SHARE_PRICES_FETCHING_END_DATE = '2022-03-01'
@@ -20,6 +20,8 @@ SUB_PERIOD_LENGTH_IN_DAYS_ARRAY = [10]
 
 ATTRIBUTE_OF_DECISION_INDEX = 3
 OUTPUT_DIRECTORY = "results_output/"
+
+GOOGLE_SPREADSHEET_DATA_FILE = "./Stock Historical Data - Sheet1.csv"
 
 
 def run_multiple_simulations(companies, start_date, end_date, attribute_of_decision_index, whole_period_length, SUB_PERIOD_LENGTH_IN_DAYS_ARRAY, set_name = None, debug_mode = False):
@@ -81,11 +83,9 @@ def run_multiple_period_simulation(companies, start_date, end_date, attribute_of
 def fetch_necessary_data_for_experiment(companies):
     initialize_database()
 
-    # Todo: Licence 29 USD required for these - find replacement.
-    # data = fetch_company_outlook_from_the_api(companies)
-    # save_fetched_data_into_database_company_outlook(data, False)
-    # data = fetch_income_statements_from_the_api(companies)
-    # save_fetched_data_into_database_income_statements(data, False)
+    save_fetched_data_into_database_google_sheets_data(
+        import_and_process_csv(GOOGLE_SPREADSHEET_DATA_FILE)
+    )
 
     save_fetched_data_into_database_share_prices(
         fetch_share_prices_from_the_api(
@@ -102,4 +102,4 @@ def fetch_necessary_data_for_experiment(companies):
 
 # Main App
 fetch_necessary_data_for_experiment(COMPANIES_SET)
-# run_multiple_simulations(COMPANIES_SET, START_DATE, END_DATE, ATTRIBUTE_OF_DECISION_INDEX, None, SUB_PERIOD_LENGTH_IN_DAYS_ARRAY, "TESTING SET", False)
+run_multiple_simulations(COMPANIES_SET, START_DATE, END_DATE, ATTRIBUTE_OF_DECISION_INDEX, None, SUB_PERIOD_LENGTH_IN_DAYS_ARRAY, "TESTING SET", False)

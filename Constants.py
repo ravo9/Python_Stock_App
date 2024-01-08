@@ -59,6 +59,7 @@ COMPANIES_TICKERS_BIG_FOUR = [
     'TSLA'
 ]
 
+# Not working due to normalized_weight = weight_value / sum_of_recalculated_weights error
 COMPANIES_TICKERS_TESLA = [
     'TSLA'
 ]
@@ -66,6 +67,12 @@ COMPANIES_TICKERS_TESLA = [
 COMPANIES_TICKERS_TESLA_APPLE = [
     'AAPL',
     'TSLA'
+]
+
+COMPANIES_TICKERS_TESLA_DISNEY_META = [
+    'TSLA',
+    'DIS',
+    'META'
 ]
 
 COMPANIES_TICKERS_MULTISET = [

@@ -2,6 +2,7 @@ import sqlite3 as sl
 from date_utils import increase_date_by_day
 from constants import DATE_FORMAT
 from printing_utils import print_error_saving_into_database
+import csv
 
 
 SQL_QUERY_CREATE_TABLE_INCOME_STATEMENTS = """CREATE TABLE IF NOT EXISTS INCOME_STATEMENT (ticker TEXT, currency TEXT, filling_date DATE, eps FLOAT, epsDiluted FLOAT, PRIMARY KEY (ticker, filling_date));"""
@@ -25,7 +26,22 @@ def initialize_database():
         con.execute(SQL_QUERY_CREATE_TABLE_SHARE_PRICES)
 
 
-def save_fetched_data_into_database_company_outlook(data, debug_mode = False):
+# Todo: Dates and FCF are currently stored as strings.
+def import_and_process_csv(file_path):
+    data_to_save = []
+    with open(file_path, newline='') as csvfile:
+        reader = csv.reader(csvfile)
+        next(reader, None)  # Skip the header row
+        for row in reader:
+            if row:  # Check if the row is not empty
+                # Assuming the currency is always in USD and amount_of_shares is not provided in the CSV
+                currency = 'USD'
+                # Todo: some numbers are in thousands - fix it
+                data_to_save.append([row[0], row[1], currency, int(row[2].replace(',', '')), int(row[3].replace(',', ''))])
+    return data_to_save
+
+
+def save_fetched_data_into_database_google_sheets_data(data, debug_mode = False):
     for report in data:
         ticker = report[0]
         filling_date = report[1]
@@ -38,17 +54,10 @@ def save_fetched_data_into_database_company_outlook(data, debug_mode = False):
         save_fetched_data_into_database(sql, data, debug_mode)
 
 
-def save_fetched_data_into_database_income_statements(data, debug_mode = False):
-    for income_statement in data:
-        ticker = income_statement['symbol']
-        currency = income_statement['reportedCurrency']
-        filling_date = income_statement['fillingDate']
-        eps = income_statement['eps']
-        eps_diluted = income_statement['epsdiluted']
-
-        sql = SQL_QUERY_SAVE_INCOME_STATEMENTS
-        data = (ticker, currency, filling_date, eps, eps_diluted)
-        save_fetched_data_into_database(sql, data, debug_mode)
+# def save_fetched_data_into_database_income_statements(data, debug_mode = False):
+    # for income_statement in data:
+        # eps = income_statement['eps']
+        # eps_diluted = income_statement['epsdiluted']
 
 
 def save_fetched_data_into_database_share_prices(data, date_format, debug_mode = False):
