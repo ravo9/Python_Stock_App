@@ -1,4 +1,4 @@
-from strategy_simulation import fetch_necessary_data_for_experiment, run_multiple_simulations
+from simulation_logic.strategy_simulation import fetch_necessary_data_for_experiment, run_multiple_simulations
 from config import COMPANIES_SET, START_DATE, END_DATE, ATTRIBUTE_OF_DECISION_INDEX, SUB_PERIOD_LENGTH_IN_DAYS_ARRAY
 from constants import DATE_FORMAT
 

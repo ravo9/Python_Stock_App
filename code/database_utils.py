@@ -12,7 +12,7 @@ def initialize_database():
         con.execute(SQL_QUERY_CREATE_TABLE_COMPANY_OUTLOOK)
         con.execute(SQL_QUERY_CREATE_TABLE_SHARE_PRICES)
 
-def import_and_process_csv(file_path):
+def fetch_financial_data_from_google_sheets_csv(file_path):
     data_to_save = []
     with open(file_path, newline='') as csvfile:
         reader = csv.reader(csvfile)
@@ -24,7 +24,7 @@ def import_and_process_csv(file_path):
                 data_to_save.append([row[0], row[1], currency, int(row[2].replace(',', '')), int(row[3].replace(',', ''))])
     return data_to_save
 
-def save_fetched_data_into_database_google_sheets_data(data, debug_mode = False):
+def save_financial_data(data):
     for report in data:
         ticker = report[0]
         filling_date = report[1]
@@ -33,23 +33,23 @@ def save_fetched_data_into_database_google_sheets_data(data, debug_mode = False)
         amount_of_shares = report[4]
         sql = SQL_QUERY_SAVE_COMPANY_OUTLOOK
         data = (ticker, filling_date, currency, free_cash_flow, amount_of_shares)
-        save_fetched_data_into_database(sql, data, debug_mode)
+        save_fetched_data_into_database(sql, data)
 
-def save_fetched_data_into_database_share_prices(data, date_format, debug_mode = False):
+def save_share_prices_data(data, date_format = DATE_FORMAT):
     for index, row in data.iterrows():
         date = index.strftime(date_format)
         averaged_price = (row["High"] + row["Low"]) / 2
         # Always USD in case of share prices fetched from Yahoo through Data Reader - MAY BE OUTDATED INFO.
         data = (row["Ticker"], date, "USD", averaged_price)
-        save_fetched_data_into_database(SQL_QUERY_SAVE_SHARE_PRICES, data, debug_mode)
+        save_fetched_data_into_database(SQL_QUERY_SAVE_SHARE_PRICES, data)
 
-def save_fetched_data_into_database(sql_query, data, debug_mode = False):
+def save_fetched_data_into_database(sql_query, data):
     con = sl.connect(DATABASE_PATH)
     with con:
         try:
             con.execute(sql_query, data)
         except:
-            print_error_saving_into_database(sql_query, data, debug_mode)
+            print("Error: save_fetched_data_into_database")
 
 def read_all_data_from_database():
     con = sl.connect(DATABASE_PATH)

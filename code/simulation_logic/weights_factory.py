@@ -1,3 +1,9 @@
+import sys
+import os
+current_dir = os.path.dirname(os.path.abspath(__file__))
+parent_dir = os.path.dirname(current_dir)
+sys.path.insert(0, parent_dir)
+
 from date_utils import increase_date_by_day
 from database_utils import read_db_share_price_in_particular_day, get_most_recent_income_statement_for_given_company_for_given_date, get_most_recent_income_statement_for_given_company_for_given_date_n_periods, get_most_recent_income_statement_for_given_company_for_given_date_company_outlook_n_periods
 from constants import DATE_FORMAT
@@ -54,19 +60,8 @@ def get_weights_for_bets_for_given_companies_for_given_date_bet_that_overpriced_
         normalized_weights.append((company_ticker, normalized_weight))
     return normalized_weights
 
-# Old approach - not sure if still works!
+# Old approach - only the difference part left over
 def get_weights_for_bets_for_given_companies_for_given_date_buy_all_just_less_of_overpriced_and_more_of_underpriced(companies, attribute_of_decision_index, given_date, debug_mode):
-    calculated_weights = []
-    normalized_weights = []
-    sum_of_weights = 0.0
-    for company_ticker in companies:
-        weight = get_investment_value_for_given_company_for_given_date_n_periods(INVESTMENT_VALUE_NUMBER_OF_PERIODS, company_ticker, attribute_of_decision_index, given_date, debug_mode)
-        if weight > 0:
-            calculated_weights.append((company_ticker, weight))
-            sum_of_weights = sum_of_weights + weight
-        # else if (weight < 0):
-        #     calculated_weights.append((company_ticker, weight))
-        #     sum_of_weights = sum_of_weights + (weight * -1)
     for weight in calculated_weights:
         company_ticker = weight[0]
         weight_value = weight[1]
@@ -74,7 +69,6 @@ def get_weights_for_bets_for_given_companies_for_given_date_buy_all_just_less_of
             normalized_weight = weight_value / sum_of_weights
             normalized_weights.append((company_ticker, normalized_weight))
         # else if (weight_value < 0):
-    return normalized_weights
 
 def get_investment_value_for_given_company_for_given_date_n_periods(number_of_periods, company_ticker, attribute_of_decision_index, date, debug_mode = False):
     # most_recent_income_statements_for_this_date = get_most_recent_income_statement_for_given_company_for_given_date_n_periods(number_of_periods, company_ticker, date, debug_mode)
