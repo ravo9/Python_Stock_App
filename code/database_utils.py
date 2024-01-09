@@ -1,11 +1,9 @@
 from date_utils import increase_date_by_day
-from constants import DATE_FORMAT
+from constants import DATE_FORMAT, DATABASE_PATH
 from printing_utils import print_error_saving_into_database
 from constants import SQL_QUERY_CREATE_TABLE_INCOME_STATEMENTS, SQL_QUERY_CREATE_TABLE_COMPANY_OUTLOOK, SQL_QUERY_CREATE_TABLE_SHARE_PRICES, SQL_QUERY_SAVE_INCOME_STATEMENTS, SQL_QUERY_SAVE_COMPANY_OUTLOOK, SQL_QUERY_SAVE_SHARE_PRICES, SQL_QUERY_READ_ALL_INCOME_STATEMENTS, SQL_QUERY_READ_ALL_COMPANY_OUTLOOK, SQL_QUERY_READ_ALL_SHARE_PRICES
 import csv
 import sqlite3 as sl
-
-DATABASE_PATH = "database.db"
 
 def initialize_database():
     con = sl.connect(DATABASE_PATH)

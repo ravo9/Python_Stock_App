@@ -12,8 +12,9 @@ SQL_QUERY_READ_ALL_SHARE_PRICES = 'SELECT * FROM SHARE_PRICES'
 
 # Other constants:
 DATE_FORMAT = "%Y-%m-%d"
-OUTPUT_DIRECTORY = "results_output/"
-GOOGLE_SPREADSHEET_DATA_FILE = "./Stock Historical Data - Sheet1.csv"
+OUTPUT_DIRECTORY = "../results_output/"
+GOOGLE_SPREADSHEET_DATA_FILE = "../Stock Historical Data - Sheet1.csv"
+DATABASE_PATH = "../database.db"
 
 # Companies sets:
 
