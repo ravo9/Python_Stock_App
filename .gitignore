@@ -122,3 +122,4 @@ cython_debug/
 
 # Project - specific:
 results_output/
+database.db
