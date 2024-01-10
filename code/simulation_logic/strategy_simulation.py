@@ -23,6 +23,14 @@ def _run_simulation(companies, start_date, end_date, attribute_of_decision_index
 def _perform_simulation_logic(sub_period_dates, companies, end_date, attribute_of_decision_index):
     original_money = 1000
     money = original_money
+
+
+    # for start_date, period_end_date in sub_period_dates:
+    #     is_last_sub_period = (period_end_date == end_date)
+    #     sub_period_weights = get_weights_for_bets_for_given_companies_for_given_date(companies, attribute_of_decision_index, start_date)
+    #     investment_change = calculate_change_for_bets_made_for_given_companies_in_given_period(sub_period_weights, is_last_sub_period, start_date, period_end_date)
+    #     money *= (1 + investment_change)
+
     sub_period_counter = 0
     sub_periods_amount = len(sub_period_dates)
     for sub_period in sub_period_dates:
@@ -30,6 +38,8 @@ def _perform_simulation_logic(sub_period_dates, companies, end_date, attribute_o
         sub_period_weights = get_weights_for_bets_for_given_companies_for_given_date(companies, attribute_of_decision_index, sub_period[0])
         investment_change_in_this_sub_period = calculate_change_for_bets_made_for_given_companies_in_given_period(sub_period_weights, (sub_period[1] == end_date), sub_period[0], sub_period[1])
         money = money * (1 + investment_change_in_this_sub_period)
+
+
     return (money - original_money)/ original_money
 
 def _present_simulation_results(companies, start_date, end_date, money_after_changes_as_percentage):
