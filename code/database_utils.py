@@ -84,22 +84,6 @@ def get_most_recent_income_statement_for_given_company_for_given_date_company_ou
         most_recent_income_statements_for_this_date = data.fetchall()
     return most_recent_income_statements_for_this_date
 
-def get_most_recent_income_statement_for_given_company_for_given_date_n_periods(number_of_periods, company_ticker, date, debug_mode = False):
-    most_recent_income_statements_for_this_date = []
-    con = sl.connect(DATABASE_PATH)
-    with con:
-        data = con.execute("SELECT * FROM INCOME_STATEMENT WHERE ticker = '" + company_ticker + "'" + " AND filling_date <= '" + date + "' ORDER BY filling_date DESC LIMIT '" + str(number_of_periods) + "'")
-        most_recent_income_statements_for_this_date = data.fetchall()
-    return most_recent_income_statements_for_this_date
-
-def get_most_recent_income_statement_for_given_company_for_given_date(company_ticker, date):
-    most_recent_income_statement_for_this_date = None
-    con = sl.connect(DATABASE_PATH)
-    with con:
-        data = con.execute("SELECT * FROM INCOME_STATEMENT WHERE ticker = '" + company_ticker + "'" + " AND filling_date <= '" + date + "' ORDER BY filling_date DESC LIMIT 1")
-        most_recent_income_statement_for_this_date = data.fetchone()
-    return most_recent_income_statement_for_this_date
-
 def read_share_prices_per_particular_period(company, start_date, end_date):
     con = sl.connect(DATABASE_PATH)
     data = []
