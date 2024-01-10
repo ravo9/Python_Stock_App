@@ -4,7 +4,7 @@ current_dir = os.path.dirname(os.path.abspath(__file__))
 parent_dir = os.path.dirname(current_dir)
 sys.path.insert(0, parent_dir)
 from date_utils import increase_date_by_day
-from database_utils import read_db_share_price_in_particular_day, get_most_recent_financial_reports_for_given_company_until_particular_date
+from database_utils import find_share_price_for_this_date, fetch_related_financial_reports
 from constants import DATE_FORMAT
 
 INVESTMENT_VALUE_NUMBER_OF_PERIODS = 4
@@ -14,14 +14,14 @@ def get_weights_for_bets_for_given_companies_for_given_date(companies, attribute
     calculated_weights = []
     normalized_weights = []
     sum_of_weights = 0.0
+
     for company_ticker in companies:
         weight = _get_investment_value_for_given_company_for_given_date_n_periods(INVESTMENT_VALUE_NUMBER_OF_PERIODS, company_ticker, attribute_of_decision_index, given_date)
-        if (weight > 0):
+
+        if (weight > 0): # else -> negative numbers problem, as I recall...
             calculated_weights.append((company_ticker, weight))
-            sum_of_weights = sum_of_weights + weight
-        # else if (weight < 0):
-        #     calculated_weights.append((company_ticker, weight))
-        #     sum_of_weights = sum_of_weights + (weight * -1)
+            sum_of_weights += weight
+
     average_weight = sum_of_weights / len(calculated_weights)
     recalculated_weights = []
     sum_of_recalculated_weights = 0.0
@@ -35,32 +35,19 @@ def get_weights_for_bets_for_given_companies_for_given_date(companies, attribute
     return normalized_weights
 
 def _get_investment_value_for_given_company_for_given_date_n_periods(number_of_periods, company_ticker, attribute_of_decision_index, date):
-    financial_reports = get_most_recent_financial_reports_for_given_company_until_particular_date(number_of_periods, company_ticker, date)
-    if financial_reports == []:
-        raise ValueError("ERROR: Empty list")
+    financial_reports = fetch_related_financial_reports(number_of_periods, company_ticker, date)
+    average_attribute_of_decision_value = _calculate_average_attribute_of_decision_value(financial_reports, attribute_of_decision_index)
+    share_price_for_this_date = find_share_price_for_this_date(date, company_ticker)
+    return average_attribute_of_decision_value / share_price_for_this_date
 
+def  _calculate_average_attribute_of_decision_value(financial_reports, attribute_of_decision_index):
     average_attribute_of_decision_value = 0.0
     index_of_amount_of_shares = 4
     for report in financial_reports:
         decision_value = report[attribute_of_decision_index] / report[index_of_amount_of_shares]
         average_attribute_of_decision_value =+ decision_value
     average_attribute_of_decision_value /= len(financial_reports)
-    share_price_for_this_date = _find_share_price_for_this_date(date, company_ticker)
-    investment_value = average_attribute_of_decision_value / share_price_for_this_date
-    return investment_value
-
-def _find_share_price_for_this_date(date, company_ticker):
-    share_price_for_this_date = None
-    date_variable = date
-    attempt = 0
-    while share_price_for_this_date is None and attempt < 5:
-        share_price_for_this_date = read_db_share_price_in_particular_day(company_ticker, date_variable)
-        if share_price_for_this_date is None:
-            date_variable = increase_date_by_day(date_variable, DATE_FORMAT)
-        attempt += 1
-    if share_price_for_this_date is None:
-        raise ValueError("ERROR: Could not find share price after 5 attempts.")
-    return share_price_for_this_date
+    return average_attribute_of_decision_value
 
 # Unused code (to be researched)
 

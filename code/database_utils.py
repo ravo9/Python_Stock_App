@@ -7,6 +7,19 @@ from config import START_DATE, END_DATE
 import csv
 import sqlite3 as sl
 
+def find_share_price_for_this_date(date, company_ticker):
+    share_price_for_this_date = None
+    date_variable = date
+    attempt = 0
+    while share_price_for_this_date is None and attempt < 5:
+        share_price_for_this_date = read_db_share_price_in_particular_day(company_ticker, date_variable)
+        if share_price_for_this_date is None:
+            date_variable = increase_date_by_day(date_variable, DATE_FORMAT)
+        attempt += 1
+    if share_price_for_this_date is None:
+        raise ValueError("ERROR: Could not find share price after 5 attempts.")
+    return share_price_for_this_date
+
 def fetch_necessary_data_for_experiment(companies):
     _initialize_database()
     _save_financial_data(_fetch_financial_data_from_google_sheets_csv(
@@ -76,12 +89,14 @@ def _read_all_data_from_database():
         for row in data:
             print(row)
 
-def get_most_recent_financial_reports_for_given_company_until_particular_date(number_of_periods, company_ticker, date):
+def fetch_related_financial_reports(number_of_periods, company_ticker, date):
     most_recent_financial_reports_for_this_date = []
     con = sl.connect(DATABASE_PATH)
     with con:
         data = con.execute("SELECT * FROM FINANCIALS WHERE ticker = '" + company_ticker + "'" + " AND filling_date <= '" + date + "' ORDER BY filling_date DESC LIMIT '" + str(number_of_periods) + "'")
         most_recent_financial_reports_for_this_date = data.fetchall()
+    if most_recent_financial_reports_for_this_date == []:
+        raise ValueError("ERROR: Empty list")
     return most_recent_financial_reports_for_this_date
 
 def read_share_prices_per_particular_period(company, start_date, end_date):
