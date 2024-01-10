@@ -4,7 +4,7 @@ current_dir = os.path.dirname(os.path.abspath(__file__))
 parent_dir = os.path.dirname(current_dir)
 sys.path.insert(0, parent_dir)
 from date_utils import increase_date_by_day
-from database_utils import read_db_share_price_in_particular_day, get_most_recent_income_statement_for_given_company_for_given_date_company_outlook_n_periods
+from database_utils import read_db_share_price_in_particular_day, get_most_recent_financial_reports_for_given_company_until_particular_date
 from constants import DATE_FORMAT
 
 INVESTMENT_VALUE_NUMBER_OF_PERIODS = 4
@@ -43,17 +43,16 @@ def get_weights_for_bets_for_given_companies_for_given_date(companies, attribute
     return normalized_weights
 
 def _get_investment_value_for_given_company_for_given_date_n_periods(number_of_periods, company_ticker, attribute_of_decision_index, date):
-    most_recent_income_statements_for_this_date = get_most_recent_income_statement_for_given_company_for_given_date_company_outlook_n_periods(number_of_periods, company_ticker, date)
-    if most_recent_income_statements_for_this_date == []:
-        print("ERROR: Empty list")
-        return None
+    financial_reports = get_most_recent_financial_reports_for_given_company_until_particular_date(number_of_periods, company_ticker, date)
+    if financial_reports == []:
+        raise ValueError("ERROR: Empty list")
     average_attribute_of_decision_value = 0.0
-    for income_statement in most_recent_income_statements_for_this_date:
-        index_of_amount_of_shares = 4 # Refactor
-        decision_value = income_statement[attribute_of_decision_index] / income_statement[index_of_amount_of_shares]
+    for report in financial_reports:
+        index_of_amount_of_shares = 4
+        decision_value = report[attribute_of_decision_index] / report[index_of_amount_of_shares]
         average_attribute_of_decision_value = average_attribute_of_decision_value + decision_value
-    average_attribute_of_decision_value = average_attribute_of_decision_value / len(most_recent_income_statements_for_this_date)
-    # attributeOfdecision_value = most_recent_income_statements_for_this_date[0][attribute_of_decision_index]
+    average_attribute_of_decision_value = average_attribute_of_decision_value / len(financial_reports)
+    # attributeOfdecision_value = financial_reports[0][attribute_of_decision_index]
     share_price_for_this_date = None
     date_variable = date
     for i in range(0, 5): # I want to try to increase 4 times, on 5th attempt - print error. The loop works in 0 - (n-1) range.

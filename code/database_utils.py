@@ -76,13 +76,13 @@ def _read_all_data_from_database():
         for row in data:
             print(row)
 
-def get_most_recent_income_statement_for_given_company_for_given_date_company_outlook_n_periods(number_of_periods, company_ticker, date):
-    most_recent_income_statements_for_this_date = []
+def get_most_recent_financial_reports_for_given_company_until_particular_date(number_of_periods, company_ticker, date):
+    most_recent_financial_reports_for_this_date = []
     con = sl.connect(DATABASE_PATH)
     with con:
         data = con.execute("SELECT * FROM FINANCIALS WHERE ticker = '" + company_ticker + "'" + " AND filling_date <= '" + date + "' ORDER BY filling_date DESC LIMIT '" + str(number_of_periods) + "'")
-        most_recent_income_statements_for_this_date = data.fetchall()
-    return most_recent_income_statements_for_this_date
+        most_recent_financial_reports_for_this_date = data.fetchall()
+    return most_recent_financial_reports_for_this_date
 
 def read_share_prices_per_particular_period(company, start_date, end_date):
     con = sl.connect(DATABASE_PATH)
