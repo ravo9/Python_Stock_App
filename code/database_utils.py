@@ -1,18 +1,18 @@
 from date_utils import increase_date_by_day
 from constants import DATE_FORMAT, DATABASE_PATH
-from printing_utils import print_error_saving_into_database
 from api_utils import fetch_share_prices_from_yahoo_finance_api
 from constants import GOOGLE_SPREADSHEET_DATA_FILE, SQL_QUERY_CREATE_TABLE_FINANCIALS, SQL_QUERY_CREATE_TABLE_SHARE_PRICES, SQL_QUERY_SAVE_FINANCIALS, SQL_QUERY_SAVE_SHARE_PRICES, SQL_QUERY_READ_ALL_FINANCIALS, SQL_QUERY_READ_ALL_SHARE_PRICES
 from config import START_DATE, END_DATE
 import csv
 import sqlite3 as sl
+from datetime import datetime
 
 def find_share_price_for_this_date(date, company_ticker):
     share_price_for_this_date = None
     date_variable = date
     attempt = 0
     while share_price_for_this_date is None and attempt < 5:
-        share_price_for_this_date = read_db_share_price_in_particular_day(company_ticker, date_variable)
+        share_price_for_this_date = _read_db_share_price_in_particular_day(company_ticker, date_variable)
         if share_price_for_this_date is None:
             date_variable = increase_date_by_day(date_variable, DATE_FORMAT)
         attempt += 1
@@ -31,6 +31,32 @@ def fetch_necessary_data_for_experiment(companies):
         END_DATE
     ))
     _read_all_data_from_database()
+
+def fetch_related_financial_reports(number_of_periods, company_ticker, date):
+    most_recent_financial_reports_for_this_date = []
+    con = sl.connect(DATABASE_PATH)
+    with con:
+        data = con.execute("SELECT * FROM FINANCIALS WHERE ticker = '" + company_ticker + "'" + " AND filling_date <= '" + date + "' ORDER BY filling_date DESC LIMIT '" + str(number_of_periods) + "'")
+        most_recent_financial_reports_for_this_date = data.fetchall()
+    if most_recent_financial_reports_for_this_date == []:
+        raise ValueError("ERROR: Empty list")
+    return most_recent_financial_reports_for_this_date
+
+def try_to_fetch_prices_in_particular_period(company, start_date, end_date, is_it_last_sub_period):
+    share_prices_table = _read_share_prices_per_particular_period(company, start_date, end_date)
+    if not is_it_last_sub_period:
+        AMOUNT_OF_DATE_INCREASE_TRIES = 4
+        end_date_variable = end_date
+        for i in range(AMOUNT_OF_DATE_INCREASE_TRIES + 1):
+            last_date = share_prices_table[-1][0]
+            if last_date >= end_date:
+                break
+            if i == AMOUNT_OF_DATE_INCREASE_TRIES:
+                print("ERROR: End date increased 4 times and still couldn't be read.")
+                return None
+            end_date_variable = increase_date_by_day(end_date_variable, DATE_FORMAT)
+            share_prices_table = _read_share_prices_per_particular_period(company, start_date, end_date_variable)
+    return [[row[1] for row in share_prices_table]]
 
 def _initialize_database():
     con = sl.connect(DATABASE_PATH)
@@ -54,19 +80,19 @@ def _save_financial_data(data):
     for report in data:
         ticker = report[0]
         filling_date = report[1]
+        filling_date_raw = datetime.strptime(filling_date, "%m/%d/%Y")
+        filling_date_formatted = filling_date_raw.strftime("%Y-%m-%d")
         currency = report[2]
         free_cash_flow = report[3]
         amount_of_shares = report[4]
-        sql = SQL_QUERY_SAVE_FINANCIALS
-        data = (ticker, filling_date, currency, free_cash_flow, amount_of_shares)
-        _save_fetched_data_into_database(sql, data)
+        data = (ticker, filling_date_formatted, currency, free_cash_flow, amount_of_shares)
+        _save_fetched_data_into_database(SQL_QUERY_SAVE_FINANCIALS, data)
 
 def _save_share_prices_data(data, date_format = DATE_FORMAT):
     for index, row in data.iterrows():
         date = index.strftime(date_format)
         averaged_price = (row["High"] + row["Low"]) / 2
-        # Always USD in case of share prices fetched from Yahoo through Data Reader - MAY BE OUTDATED INFO.
-        data = (row["Ticker"], date, "USD", averaged_price)
+        data = (row["Ticker"], date, "USD", averaged_price) # Alawys USD; not sure if correct - check it.
         _save_fetched_data_into_database(SQL_QUERY_SAVE_SHARE_PRICES, data)
 
 def _save_fetched_data_into_database(sql_query, data):
@@ -78,59 +104,23 @@ def _save_fetched_data_into_database(sql_query, data):
             print(f"Error in save_fetched_data_into_database: {e}")
 
 def _read_all_data_from_database():
-    con = sl.connect(DATABASE_PATH)
-    with con:
-        data = con.execute(SQL_QUERY_READ_ALL_FINANCIALS)
-        print("DATABASE TEST: FINANCIALS")
-        for row in data:
-            print(row)
-        data = con.execute(SQL_QUERY_READ_ALL_SHARE_PRICES)
-        print("DATABASE TEST: SHARE_PRICES")
-        for row in data:
-            print(row)
+    queries = {
+        "DATABASE TEST: FINANCIALS": SQL_QUERY_READ_ALL_FINANCIALS,
+        "DATABASE TEST: SHARE_PRICES": SQL_QUERY_READ_ALL_SHARE_PRICES
+    }
+    with sl.connect(DATABASE_PATH) as con:
+        for label, query in queries.items():
+            print(label)
+            for row in con.execute(query):
+                print(row)
 
-def fetch_related_financial_reports(number_of_periods, company_ticker, date):
-    most_recent_financial_reports_for_this_date = []
-    con = sl.connect(DATABASE_PATH)
-    with con:
-        data = con.execute("SELECT * FROM FINANCIALS WHERE ticker = '" + company_ticker + "'" + " AND filling_date <= '" + date + "' ORDER BY filling_date DESC LIMIT '" + str(number_of_periods) + "'")
-        most_recent_financial_reports_for_this_date = data.fetchall()
-    if most_recent_financial_reports_for_this_date == []:
-        raise ValueError("ERROR: Empty list")
-    return most_recent_financial_reports_for_this_date
-
-def read_share_prices_per_particular_period(company, start_date, end_date):
+def _read_share_prices_per_particular_period(company, start_date, end_date):
     con = sl.connect(DATABASE_PATH)
     data = []
     with con:
         data = con.execute("SELECT * FROM SHARE_PRICES WHERE ticker = '" + company + "' AND date >='" + start_date + "' AND date <='" + end_date + "'")
-    values_to_export = []
-    for row in data.fetchall():
-        values_to_export.append((row[1], row[3]))
-    return values_to_export
+    return [(row[1], row[3]) for row in data.fetchall()]
 
-def try_to_fetch_prices_in_particular_period(company, start_date, end_date, is_it_last_sub_period):
-    share_prices_table = read_share_prices_per_particular_period(company, start_date, end_date)
-    if is_it_last_sub_period is False:
-        end_date_variable = end_date
-        # I want to try to increase 4 times, on 5th attempt - print error. The loop works in 0 - (n-1) range.
-        AMOUNT_OF_DATE_INCREASE_TRIES = 4
-        for i in range(0, (AMOUNT_OF_DATE_INCREASE_TRIES + 1)):
-            last_date = share_prices_table[-1][0]
-            if last_date >=end_date:
-                break
-            else:
-                if i < AMOUNT_OF_DATE_INCREASE_TRIES:
-                    end_date_variable = increase_date_by_day(end_date_variable, DATE_FORMAT)
-                    share_prices_table = read_share_prices_per_particular_period(company, start_date, end_date_variable)
-                else:
-                    share_prices_table = None
-                    print("ERROR: End date increased 4 times and still couldn't be read.")
-    return [[row[1] for row in share_prices_table]]
-
-def read_db_share_price_in_particular_day(company, date):
+def _read_db_share_price_in_particular_day(company, date):
     fetched_share_price_data = try_to_fetch_prices_in_particular_period(company, date, date, True)
-    if len(fetched_share_price_data[0]) == 0:
-        return None
-    else:
-        return fetched_share_price_data[0][0]
+    return None if len(fetched_share_price_data[0]) == 0 else fetched_share_price_data[0][0]
