@@ -3,7 +3,7 @@ import os
 current_dir = os.path.dirname(os.path.abspath(__file__))
 parent_dir = os.path.dirname(current_dir)
 sys.path.insert(0, parent_dir)
-from simulation_logic.calculation_utils import calculate_change_for_bets_made_for_given_companies_in_given_period, calculate_average_share_price_change_for_given_companies_in_given_period
+from simulation_logic.calculation_utils import calculate_change_in_investment_value_using_provided_weights, calculate_average_share_price_change_for_given_companies_in_given_period
 from printing_utils import print_money_after_all_changes_according_to_my_strategy, print_money_after_all_changes_according_to_my_strategy_as_percentage, print_my_strategy_minus_average_change, print_average_change_of_given_companies_in_given_period
 from date_utils import split_whole_period_into_chunks
 from database_utils import fetch_necessary_data_for_experiment
@@ -26,7 +26,7 @@ def _perform_simulation_logic(sub_period_dates, companies, end_date, attribute_o
     for sub_period_start_date, sub_period_end_date in sub_period_dates:
         is_last_sub_period = (sub_period_end_date == end_date)
         sub_period_weights = get_weights_for_bets_for_given_companies_for_given_date(companies, attribute_of_decision_index, sub_period_start_date)
-        investment_change = calculate_change_for_bets_made_for_given_companies_in_given_period(sub_period_weights, is_last_sub_period, sub_period_start_date, sub_period_end_date)
+        investment_change = calculate_change_in_investment_value_using_provided_weights(sub_period_weights, is_last_sub_period, sub_period_start_date, sub_period_end_date)
         money *= (1 + investment_change)
     return (money - original_money)/ original_money
 
