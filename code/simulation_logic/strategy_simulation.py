@@ -24,9 +24,8 @@ def _perform_simulation_logic(sub_period_dates, companies, end_date, attribute_o
     original_money = 1000
     money = original_money
     for sub_period_start_date, sub_period_end_date in sub_period_dates:
-        is_last_sub_period = (sub_period_end_date == end_date)
         sub_period_weights = get_weights_for_bets_for_given_companies_for_given_date(companies, attribute_of_decision_index, sub_period_start_date)
-        investment_change = calculate_change_in_investment_value_using_provided_weights(sub_period_weights, is_last_sub_period, sub_period_start_date, sub_period_end_date)
+        investment_change = calculate_change_in_investment_value_using_provided_weights(sub_period_weights, (sub_period_end_date == end_date), sub_period_start_date, sub_period_end_date)
         money *= (1 + investment_change)
     return (money - original_money)/ original_money
 

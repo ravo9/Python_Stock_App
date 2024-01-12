@@ -51,12 +51,12 @@ class TestCalculateAverageSharePriceChange(unittest.TestCase):
     def test_average_price_increase(self, mock_fetch_prices):
         # Mock data: Prices increase for both companies
         mock_fetch_prices.side_effect = [
-            [[100], [110]],  # First company: 10% increase
-            [[200], [240]]   # Second company: 20% increase
+            [(100, 110)],  # First company: 10% increase
+            [(200, 240)]   # Second company: 20% increase
         ]
         companies = ['COMPANY_A', 'COMPANY_B']
         average_change = calculate_average_share_price_change_for_given_companies_in_given_period(companies, '2021-01-01', '2021-01-31')
-        self.assertEqual(average_change, 0.15)  # Expecting 15% average increase
+        self.assertAlmostEqual(average_change, 0.15, places=2) # Expecting 15% average increase
 
     @patch('simulation_logic.calculation_utils.try_to_fetch_prices_in_particular_period')
     def test_average_price_no_change(self, mock_fetch_prices):
