@@ -14,14 +14,11 @@ def get_weights_for_bets_for_given_companies_for_given_date(companies, attribute
     calculated_weights = []
     normalized_weights = []
     sum_of_weights = 0.0
-
     for company_ticker in companies:
         weight = _get_investment_value_for_given_company_for_given_date_n_periods(INVESTMENT_VALUE_NUMBER_OF_PERIODS, company_ticker, attribute_of_decision_index, given_date)
-
         if (weight > 0): # else -> negative numbers problem, as I recall...
             calculated_weights.append((company_ticker, weight))
             sum_of_weights += weight
-
     average_weight = sum_of_weights / len(calculated_weights)
     recalculated_weights = []
     sum_of_recalculated_weights = 0.0

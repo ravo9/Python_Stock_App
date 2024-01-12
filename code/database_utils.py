@@ -1,7 +1,7 @@
 from date_utils import increase_date_by_day
 from constants import DATE_FORMAT, DATABASE_PATH
 from api_utils import fetch_share_prices_from_yahoo_finance_api
-from constants import GOOGLE_SPREADSHEET_DATA_FILE, SQL_QUERY_CREATE_TABLE_FINANCIALS, SQL_QUERY_CREATE_TABLE_SHARE_PRICES, SQL_QUERY_SAVE_FINANCIALS, SQL_QUERY_SAVE_SHARE_PRICES, SQL_QUERY_READ_ALL_FINANCIALS, SQL_QUERY_READ_ALL_SHARE_PRICES
+from constants import GOOGLE_SPREADSHEET_DATA_FILE, SQL_QUERY_CREATE_TABLE_FINANCIALS, SQL_QUERY_CREATE_TABLE_SHARE_PRICES, SQL_QUERY_SAVE_FINANCIALS, SQL_QUERY_SAVE_SHARE_PRICES, SQL_QUERY_READ_ALL_FINANCIALS, SQL_QUERY_READ_ALL_SHARE_PRICES, SQL_QUERY_MOST_RECENT_FINANCIAL_REPORTS
 from config import START_DATE, END_DATE
 import csv
 import sqlite3 as sl
@@ -30,14 +30,12 @@ def fetch_necessary_data_for_experiment(companies):
         START_DATE,
         END_DATE
     ))
-    _read_all_data_from_database()
+    # _read_all_data_from_database()
 
 def fetch_related_financial_reports(number_of_periods, company_ticker, date):
-    most_recent_financial_reports_for_this_date = []
     con = sl.connect(DATABASE_PATH)
     with con:
-        data = con.execute("SELECT * FROM FINANCIALS WHERE ticker = '" + company_ticker + "'" + " AND filling_date <= '" + date + "' ORDER BY filling_date DESC LIMIT '" + str(number_of_periods) + "'")
-        most_recent_financial_reports_for_this_date = data.fetchall()
+        most_recent_financial_reports_for_this_date = (con.execute(SQL_QUERY_MOST_RECENT_FINANCIAL_REPORTS, (company_ticker, date, number_of_periods))).fetchall()
     if most_recent_financial_reports_for_this_date == []:
         raise ValueError("ERROR: Empty list")
     return most_recent_financial_reports_for_this_date
@@ -71,17 +69,13 @@ def _fetch_financial_data_from_google_sheets_csv(file_path):
         next(reader, None)  # Skip the header row
         for row in reader:
             if row:
-                currency = 'USD' # Hardcoded
-                # Todo: numbers are in thousands - fix it
-                data_to_save.append([row[0], row[1], currency, int(row[2].replace(',', '')), int(row[3].replace(',', ''))])
+                data_to_save.append([row[0], row[1], 'USD', int(row[2].replace(',', '')), int(row[3].replace(',', ''))]) # Todo: "numbers are in thousands"; hard-coded currency;
     return data_to_save
 
 def _save_financial_data(data):
     for report in data:
         ticker = report[0]
-        filling_date = report[1]
-        filling_date_raw = datetime.strptime(filling_date, "%m/%d/%Y")
-        filling_date_formatted = filling_date_raw.strftime("%Y-%m-%d")
+        filling_date_formatted = (datetime.strptime(report[1], "%m/%d/%Y")).strftime("%Y-%m-%d")
         currency = report[2]
         free_cash_flow = report[3]
         amount_of_shares = report[4]
@@ -92,16 +86,14 @@ def _save_share_prices_data(data, date_format = DATE_FORMAT):
     for index, row in data.iterrows():
         date = index.strftime(date_format)
         averaged_price = (row["High"] + row["Low"]) / 2
-        data = (row["Ticker"], date, "USD", averaged_price) # Alawys USD; not sure if correct - check it.
+        data = (row["Ticker"], date, "USD", averaged_price) # Alawys USD - not sure if correct;
         _save_fetched_data_into_database(SQL_QUERY_SAVE_SHARE_PRICES, data)
 
 def _save_fetched_data_into_database(sql_query, data):
-    con = sl.connect(DATABASE_PATH)
-    with con:
-        try:
-            con.execute(sql_query, data)
-        except Exception as e:
-            print(f"Error in save_fetched_data_into_database: {e}")
+    try:
+        (sl.connect(DATABASE_PATH)).execute(sql_query, data)
+    except Exception as e:
+        print("Error in save_fetched_data_into_database: {e}")
 
 def _read_all_data_from_database():
     queries = {
