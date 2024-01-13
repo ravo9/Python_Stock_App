@@ -9,17 +9,7 @@ from database_utils import try_to_fetch_prices_in_particular_period
 
 calculate_change_in_share_price = lambda first_day_price, last_day_price: (last_day_price - first_day_price)/first_day_price
 
-calculate_change_in_invested_money = lambda change_in_price, company_bet_weight: change_in_price * company_bet_weight
-
-def calculate_change_in_investment_value_using_provided_weights(companies_tickers_with_weights, is_it_last_sub_period, start_date, end_date):
-    sum_of_changes_in_invested_money = 0.0
-    for company_ticker, company_bet_weight in companies_tickers_with_weights:
-        share_prices_table = try_to_fetch_prices_in_particular_period(company_ticker, start_date, end_date, is_it_last_sub_period)
-        first_day_price, last_day_price = share_prices_table[0][0], share_prices_table[0][-1]
-        change_in_price = calculate_change_in_share_price(first_day_price, last_day_price)
-        sum_of_changes_in_invested_money += calculate_change_in_invested_money(change_in_price, company_bet_weight)
-    return sum_of_changes_in_invested_money
-
+# If we check difference between 01.01.23 and 0.1.01.24, and the last day is not available - then it will actually check 01.01.23 - 29.12.23.
 def calculate_average_share_price_change_for_given_companies_in_given_period(companies_tickers, start_date, end_date):
     sum_of_changes = 0.0
     for company in companies_tickers:
@@ -27,6 +17,16 @@ def calculate_average_share_price_change_for_given_companies_in_given_period(com
         first_day_price, last_day_price = share_prices_table[0][0], share_prices_table[0][-1]
         sum_of_changes += calculate_change_in_share_price(first_day_price, last_day_price)
     return sum_of_changes / len(companies_tickers)
+
+def calculate_investment_value_change(companies_tickers_with_weights, is_it_last_sub_period, start_date, end_date):
+    change_in_invested_money = 0.0
+    sum_of_all_bets = sum(weight for _, weight in companies_tickers_with_weights)
+    for company_ticker, company_bet_weight in companies_tickers_with_weights:
+        share_prices_table = try_to_fetch_prices_in_particular_period(company_ticker, start_date, end_date, is_it_last_sub_period)
+        first_day_price, last_day_price = share_prices_table[0][0], share_prices_table[0][-1]
+        change_in_price = calculate_change_in_share_price(first_day_price, last_day_price)
+        change_in_invested_money += change_in_price * company_bet_weight / sum_of_all_bets
+    return change_in_invested_money
 
 # UNIT TESTING
 
