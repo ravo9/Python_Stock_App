@@ -91,9 +91,11 @@ def _save_share_prices_data(data, date_format = DATE_FORMAT):
 
 def _save_fetched_data_into_database(sql_query, data):
     try:
-        (sl.connect(DATABASE_PATH)).execute(sql_query, data)
+        with sl.connect(DATABASE_PATH) as con:
+            con.execute(sql_query, data)
+            con.commit()
     except Exception as e:
-        print("Error in save_fetched_data_into_database: {e}")
+        print(f"Error in save_fetched_data_into_database: {e}")
 
 def _read_all_data_from_database():
     queries = {

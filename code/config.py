@@ -1,6 +1,4 @@
-from constants import COMPANIES_TICKERS_TESLA_DISNEY_META # More sets may be added here for convenience.
-
-COMPANIES_SET = COMPANIES_TICKERS_TESLA_DISNEY_META
+COMPANIES_SET = ['TSLA', 'DIS', 'META', 'MSFT', 'AMZN', 'NFLX']
 
 START_DATE = '2023-06-01'
 
