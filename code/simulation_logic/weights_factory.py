@@ -26,7 +26,7 @@ def _calculate_weight(number_of_periods, company_ticker, attribute_of_decision_i
     value_per_dollar_spent = average_value_of_decision_attribute_over_fetched_reports / all_shares_amount / share_price_for_this_date
     return value_per_dollar_spent
 
-# Unused code (to be researched)
+# Todo: extract useful pieces of this unsused code logic into "modification" functions
 
     # average_weight = sum_of_weights / len(calculated_weights)
     # recalculated_weights = []

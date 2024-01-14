@@ -22,6 +22,8 @@ def find_share_price_for_this_date(date, company_ticker):
 
 def fetch_necessary_data_for_experiment(companies):
     _initialize_database()
+    # Todo: how to automate this process? To fetch financial reports automatically (when the new ones are released),
+    # to fetch more historical reports for better testing, to fetch more companies without manual work.
     _save_financial_data(_fetch_financial_data_from_google_sheets_csv(
         GOOGLE_SPREADSHEET_DATA_FILE
     ))
