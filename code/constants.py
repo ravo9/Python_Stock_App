@@ -11,4 +11,4 @@ SQL_QUERY_MOST_RECENT_FINANCIAL_REPORTS = 'SELECT * FROM FINANCIALS WHERE ticker
 # Other constants:
 DATE_FORMAT = "%Y-%m-%d"
 GOOGLE_SPREADSHEET_DATA_FILE = "../Stock Historical Data - Sheet1.csv"
-DATABASE_PATH = "./database.db"
+DATABASE_PATH = "../database.db"
