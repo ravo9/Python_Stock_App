@@ -1,13 +1,11 @@
 from date_utils import increase_date_by_day
 from constants import DATE_FORMAT, DATABASE_PATH
 from api_utils import fetch_database_from_paid_api, fetch_share_prices_from_yahoo_finance_api
-from constants import GOOGLE_SPREADSHEET_DATA_FILE
+from constants import GOOGLE_SPREADSHEET_DATA_FILE, PAID_API_DATABASE_PATH
 from config import START_DATE, END_DATE
 import csv
 import sqlite3 as sl
 from datetime import datetime
-
-PAID_API_DATABASE = 'financial_reports.db'
 
 SQL_QUERY_CREATE_TABLE_BALANCE_SHEET = '''
 CREATE TABLE IF NOT EXISTS balance_sheet (
@@ -29,8 +27,24 @@ CREATE TABLE IF NOT EXISTS balance_sheet (
 # liabilities_and_equity REAL,
 # noncurrent_assets REAL,
 # noncurrent_liabilities REAL,
-SQL_QUERY_CREATE_TABLE_INCOME_STATEMENT = '''CREATE TABLE IF NOT EXISTS income_statement (cik TEXT, company_name TEXT, end_date TEXT, filing_date TEXT, PRIMARY KEY (company_name, end_date))'''
-SQL_QUERY_CREATE_TABLE_CASH_FLOW_STATEMENT = '''CREATE TABLE IF NOT EXISTS cash_flow_statement (cik TEXT, company_name TEXT, end_date TEXT, filing_date TEXT, PRIMARY KEY (company_name, end_date))'''
+SQL_QUERY_CREATE_TABLE_INCOME_STATEMENT = '''
+CREATE TABLE IF NOT EXISTS income_statement (
+    cik TEXT,
+    company_name TEXT, end_date TEXT,
+    filing_date TEXT,
+    PRIMARY KEY (company_name, end_date)
+)'''
+SQL_QUERY_CREATE_TABLE_CASH_FLOW_STATEMENT = '''
+    CREATE TABLE IF NOT EXISTS cash_flow_statement (
+    cik TEXT,
+    company_name TEXT,
+    end_date TEXT,
+    filing_date TEXT,
+
+    net_cash_flow REAL,
+
+    PRIMARY KEY (company_name, end_date))
+'''
 SQL_QUERY_READ_ALL_BALANCE_SHEET = 'SELECT * FROM balance_sheet'
 SQL_QUERY_READ_ALL_INCOME_STATEMENT = 'SELECT * FROM income_statement'
 SQL_QUERY_READ_ALL_CASH_FLOW_STATEMENT = 'SELECT * FROM cash_flow_statement'
@@ -51,7 +65,7 @@ def steal_data_from_paid_api(companies):
     read_database_from_paid_api()
 
 def save_database_from_paid_api(financial_data):
-    conn = sl.connect(PAID_API_DATABASE)
+    conn = sl.connect(PAID_API_DATABASE_PATH)
     cursor = conn.cursor()
 
     cursor.execute(SQL_QUERY_CREATE_TABLE_BALANCE_SHEET)
@@ -72,6 +86,7 @@ def save_database_from_paid_api(financial_data):
 
         cursor.execute('INSERT OR REPLACE INTO balance_sheet VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)', (
             cik, company_name, end_date, filing_date,
+
             None,
             None,
             balance_sheet['current_liabilities']['value'],
@@ -83,8 +98,10 @@ def save_database_from_paid_api(financial_data):
         cursor.execute('INSERT OR REPLACE INTO income_statement VALUES(?, ?, ?, ?)', (
             cik, company_name, end_date, filing_date
         ))
-        cursor.execute('INSERT OR REPLACE INTO cash_flow_statement VALUES(?, ?, ?, ?)', (
-            cik, company_name, end_date, filing_date
+        cursor.execute('INSERT OR REPLACE INTO cash_flow_statement VALUES(?, ?, ?, ?, ?)', (
+            cik, company_name, end_date, filing_date,
+
+            cash_flow_statement['net_cash_flow']['value']
         ))
     conn.commit()
     conn.close()
@@ -95,7 +112,7 @@ def read_database_from_paid_api():
         "DATABASE: income_statement": SQL_QUERY_READ_ALL_INCOME_STATEMENT,
         "DATABASE: cash_flow_statement": SQL_QUERY_READ_ALL_CASH_FLOW_STATEMENT
     }
-    with sl.connect(PAID_API_DATABASE) as con:
+    with sl.connect(PAID_API_DATABASE_PATH) as con:
         cursor = con.cursor()
         for label, query in queries.items():
             print(label)
