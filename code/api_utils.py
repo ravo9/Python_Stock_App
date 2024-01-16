@@ -1,17 +1,25 @@
 import pandas
 import yfinance as yf
 import requests
+from config import AMOUNT_OF_HISTORIC_REPORTS_TO_FETCH
 
-# As it's paid, I don't wanna the app to be dependent on it. I wanna use the API
-# temporarily, scrap data, and then use this DB offline.
 API_ENDPOINT = "https://api.polygon.io/vX/reference/financials"
 API_KEY = "KJSvMYzpmGOzks95qGHHL4THnEztfEbm"
-def fetch_database_from_paid_api(company):
+
+def fetch_database_from_paid_api_for_given_companies(companies):
+    financial_data = []
+    for company in companies:
+        data = _fetch_database_from_paid_api(company)
+        if data:
+            financial_data.append((data, company))
+    return financial_data
+
+def _fetch_database_from_paid_api(company):
     params = {
-    "apiKey": API_KEY,
-    "ticker": company,
-    "limit": (1+4)
-    # quarter vs annually
+        "apiKey": API_KEY,
+        "ticker": company,
+        "limit": AMOUNT_OF_HISTORIC_REPORTS_TO_FETCH + 1
+        # quarter vs annually
     }
     response = requests.get(API_ENDPOINT, params=params)
     if response.status_code == 200:
@@ -19,7 +27,10 @@ def fetch_database_from_paid_api(company):
     else:
         return None
 
-def fetch_share_prices_from_yahoo_finance_api(companies, start_date, end_date):
+def fetch_total_amount_of_shares_on_particular_day(company, date):
+    return (yf.Ticker(company)).get_shares_full(start=date)[0] # todo: optimise
+
+def fetch_share_prices_from_yfinance(companies, start_date, end_date):
     fetched_prices = []
     table_columns_to_be_fetched = ["High", "Low"]
     for company in companies:
