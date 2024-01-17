@@ -5,18 +5,13 @@ from config import START_DATE, END_DATE
 import sqlite3 as sl
 from datetime import datetime
 
-SQL_QUERY_CREATE_TABLE_CASH_FLOW_STATEMENT = '''
-    CREATE TABLE IF NOT EXISTS cash_flow_statement (
-    company_name TEXT,
-    end_date TEXT,
-    filing_date TEXT,
-    net_cash_flow REAL,
-    PRIMARY KEY (company_name, end_date))
-'''
+SQL_QUERY_CREATE_TABLE_CASH_FLOW_STATEMENT = '''CREATE TABLE IF NOT EXISTS cash_flow_statement (company_name TEXT, end_date TEXT, filing_date TEXT, net_cash_flow REAL, PRIMARY KEY (company_name, end_date))'''
 SQL_QUERY_READ_ALL_CASH_FLOW_STATEMENT = 'SELECT * FROM cash_flow_statement'
 SQL_QUERY_CREATE_TABLE_SHARE_PRICES = """CREATE TABLE IF NOT EXISTS SHARE_PRICES (ticker TEXT, date DATE, currency TEXT, price FLOAT, PRIMARY KEY (ticker, date));"""
 SQL_QUERY_SAVE_SHARE_PRICES = 'INSERT OR REPLACE INTO SHARE_PRICES (ticker, date, currency, price) values(?, ?, ?, ?)'
 SQL_QUERY_READ_ALL_SHARE_PRICES = 'SELECT * FROM SHARE_PRICES'
+
+SQL_QUERY_MOST_RECENT_FINANCIAL_REPORTS = 'SELECT * FROM cash_flow_statement WHERE company_name = ? AND filing_date <= ? ORDER BY filing_date DESC LIMIT ?'
 
 def fetch_necessary_data_for_experiment(companies):
     _initialize_database()
@@ -36,9 +31,7 @@ def _save_financial_data(data_with_company_ticker):
         cursor = conn.cursor()
         for report in financial_data['results']:
             end_date = report['end_date']
-            filing_date = None
-            if 'filing_date' in report:
-                filing_date = report['filing_date']
+            filing_date = report.get('filing_date') # nullable
             cash_flow_statement = report['financials']['cash_flow_statement']
             cursor.execute('INSERT OR REPLACE INTO cash_flow_statement VALUES(?, ?, ?, ?)', (
                 ticker, end_date, filing_date,

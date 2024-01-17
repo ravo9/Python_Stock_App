@@ -22,10 +22,7 @@ def _fetch_database_from_paid_api(company):
         # quarter vs annually
     }
     response = requests.get(API_ENDPOINT, params=params)
-    if response.status_code == 200:
-        return response.json()
-    else:
-        return None
+    return response.json() if response.ok else None
 
 def fetch_total_amount_of_shares_on_particular_day(company, date):
     return (yf.Ticker(company)).get_shares_full(start=date)[0] # todo: optimise
