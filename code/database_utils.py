@@ -1,6 +1,6 @@
 from date_utils import increase_date_by_day
 from constants import DATE_FORMAT, DATABASE_PATH
-from api_utils import fetch_database_from_paid_api_for_given_companies, fetch_share_prices_from_yfinance
+from api_utils import fetch_financial_data_for_given_companies, fetch_share_prices_from_yfinance
 from config import START_DATE, END_DATE
 import sqlite3 as sl
 from datetime import datetime
@@ -15,7 +15,7 @@ SQL_QUERY_MOST_RECENT_FINANCIAL_REPORTS = 'SELECT * FROM cash_flow_statement WHE
 
 def fetch_necessary_data_for_experiment(companies):
     _initialize_database()
-    _save_financial_data(fetch_database_from_paid_api_for_given_companies(companies))
+    _save_financial_data(fetch_financial_data_for_given_companies(companies))
     _save_share_prices_data(fetch_share_prices_from_yfinance(companies, START_DATE, END_DATE))
     _read_all_data_from_databases()
 

@@ -4,7 +4,6 @@ current_dir = os.path.dirname(os.path.abspath(__file__))
 parent_dir = os.path.dirname(current_dir)
 sys.path.insert(0, parent_dir)
 from simulation_logic.calculation_utils import calculate_investment_value_change, calculate_average_share_price_change_for_given_companies_in_given_period
-from printing_utils import print_simulation_results
 from date_utils import split_whole_period_into_chunks
 from database_utils import fetch_necessary_data_for_experiment
 from simulation_logic.weights_factory import get_weights_for_bets_for_given_companies_for_given_date
@@ -35,4 +34,5 @@ def _perform_simulation_logic(companies, start_date, end_date, period_length_in_
     return (money - original_money)/ original_money
 
 def _present_simulation_results(money_invested_equally, money_invested_according_to_strategy):
-    print_simulation_results(money_invested_equally, money_invested_according_to_strategy)
+    print("MONEY INVESTED IN GIVEN COMPANIES EQUALLY (AVERAGE): " + "{0:.2%}".format(money_invested_equally))
+    print("MONEY INVESTED IN GIVEN COMPANIES USING TESTED STRATEGY: " + "{0:.2%}".format(money_invested_according_to_strategy))

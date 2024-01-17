@@ -6,15 +6,15 @@ from config import AMOUNT_OF_HISTORIC_REPORTS_TO_FETCH
 API_ENDPOINT = "https://api.polygon.io/vX/reference/financials"
 API_KEY = "KJSvMYzpmGOzks95qGHHL4THnEztfEbm"
 
-def fetch_database_from_paid_api_for_given_companies(companies):
+def fetch_financial_data_for_given_companies(companies):
     financial_data = []
     for company in companies:
-        data = _fetch_database_from_paid_api(company)
+        data = _fetch_data_by_rest_api(company)
         if data:
             financial_data.append((data, company))
     return financial_data
 
-def _fetch_database_from_paid_api(company):
+def _fetch_data_by_rest_api(company):
     params = {
         "apiKey": API_KEY,
         "ticker": company,
