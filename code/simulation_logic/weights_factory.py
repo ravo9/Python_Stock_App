@@ -10,22 +10,18 @@ from api_utils import fetch_total_amount_of_shares_on_particular_day
 
 INVESTMENT_VALUE_NUMBER_OF_PERIODS = 4
 
-def get_weights_for_bets_for_given_companies_for_given_date(companies, attribute_of_decision_index, given_date):
+def get_weights_for_bets_for_given_companies_for_given_date(companies, attribute_of_decision_index, date):
     calculated_weights = []
     sum_of_weights = 0.0
     for company_ticker in companies:
-        weight = _calculate_weight(INVESTMENT_VALUE_NUMBER_OF_PERIODS, company_ticker, attribute_of_decision_index, given_date)
-        if (weight > 0): # else -> negative numbers problem
-            calculated_weights.append((company_ticker, weight))
+        financial_reports = fetch_related_financial_reports(INVESTMENT_VALUE_NUMBER_OF_PERIODS, company_ticker, date)
+        all_shares_amount  = fetch_total_amount_of_shares_on_particular_day(company_ticker, date)
+        share_price_for_this_date = find_share_price_for_this_date(date, company_ticker)
+        average_value_of_decision_attribute_over_fetched_reports = sum(report[attribute_of_decision_index] for report in financial_reports) / len(financial_reports)
+        value_per_dollar_spent = average_value_of_decision_attribute_over_fetched_reports / all_shares_amount / share_price_for_this_date
+        if (value_per_dollar_spent > 0): # else -> negative numbers problem
+            calculated_weights.append((company_ticker, value_per_dollar_spent))
     return calculated_weights
-
-def _calculate_weight(number_of_periods, company_ticker, attribute_of_decision_index, date):
-    financial_reports = fetch_related_financial_reports(number_of_periods, company_ticker, date)
-    all_shares_amount  = fetch_total_amount_of_shares_on_particular_day(company_ticker, date)
-    share_price_for_this_date = find_share_price_for_this_date(date, company_ticker)
-    average_value_of_decision_attribute_over_fetched_reports = sum(report[attribute_of_decision_index] for report in financial_reports) / len(financial_reports)
-    value_per_dollar_spent = average_value_of_decision_attribute_over_fetched_reports / all_shares_amount / share_price_for_this_date
-    return value_per_dollar_spent
 
 # Todo: extract useful pieces of this unsused code logic into "modification" functions
 
