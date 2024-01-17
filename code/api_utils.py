@@ -7,22 +7,16 @@ API_ENDPOINT = "https://api.polygon.io/vX/reference/financials"
 API_KEY = "KJSvMYzpmGOzks95qGHHL4THnEztfEbm"
 
 def fetch_financial_data_for_given_companies(companies):
-    financial_data = []
-    for company in companies:
-        data = _fetch_data_by_rest_api(company)
-        if data:
-            financial_data.append((data, company))
-    return financial_data
-
-def _fetch_data_by_rest_api(company):
-    params = {
-        "apiKey": API_KEY,
-        "ticker": company,
-        "limit": AMOUNT_OF_HISTORIC_REPORTS_TO_FETCH + 1
-        # quarter vs annually
-    }
-    response = requests.get(API_ENDPOINT, params=params)
-    return response.json() if response.ok else None
+    return [
+        (response.json(), company)
+        for company in companies
+        if (response := requests.get(API_ENDPOINT, params={
+            "apiKey": API_KEY,
+            "ticker": company,
+            "limit": AMOUNT_OF_HISTORIC_REPORTS_TO_FETCH + 1
+            # quarter vs annually
+        })).ok
+    ]
 
 def fetch_total_amount_of_shares_on_particular_day(company, date):
     return (yf.Ticker(company)).get_shares_full(start=date)[0] # todo: optimise
