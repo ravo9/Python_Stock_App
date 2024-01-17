@@ -2,7 +2,11 @@ from simulation_logic.strategy_simulation import run_multiple_simulations
 from config import COMPANIES_SET, START_DATE, END_DATE, ATTRIBUTE_OF_DECISION_INDEX, SUB_PERIOD_LENGTH_IN_DAYS_ARRAY
 import unittest
 from simulation_logic.calculation_utils import TestCalculateChangeInSharePrice, TestCalculateAverageSharePriceChange
+from simulation_logic.weights_factory import get_weights_for_bets_for_given_companies_for_given_date
+from database_utils import fetch_necessary_data_for_experiment
 
 # Main App
 # unittest.main() # Run Unit Tests
 run_multiple_simulations(COMPANIES_SET, START_DATE, END_DATE, ATTRIBUTE_OF_DECISION_INDEX, SUB_PERIOD_LENGTH_IN_DAYS_ARRAY)
+# fetch_necessary_data_for_experiment("MSFT")
+# get_weights_for_bets_for_given_companies_for_given_date("MSFT", ATTRIBUTE_OF_DECISION_INDEX, END_DATE)

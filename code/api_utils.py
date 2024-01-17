@@ -18,8 +18,16 @@ def fetch_financial_data_for_given_companies(companies):
         })).ok
     ]
 
+# todo: optimise
 def fetch_total_amount_of_shares_on_particular_day(company, date):
-    return (yf.Ticker(company)).get_shares_full(start=date)[0] # todo: optimise
+    try:
+        shares_data = yf.Ticker(company).get_shares_full(start=date)
+        print(shares_data)
+        if shares_data is None:
+            raise ValueError(f"No data returned for company {company} on {date}")
+        return shares_data[0]
+    except Exception as e:
+        raise RuntimeError(f"An error occurred while fetching shares data: {e}")
 
 def fetch_share_prices_from_yfinance(companies, start_date, end_date):
     fetched_prices = []
