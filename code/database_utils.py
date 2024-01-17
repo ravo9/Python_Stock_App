@@ -73,7 +73,7 @@ def fetch_related_financial_reports(number_of_periods, company_ticker, date):
         raise ValueError("ERROR: Empty list")
     return most_recent_financial_reports_for_this_date
 
-def try_to_fetch_prices_in_particular_period(company, start_date, end_date, is_it_last_sub_period):
+def fetch_prices_in_particular_period(company, start_date, end_date, is_it_last_sub_period = True):
     share_prices_table = _read_share_prices_per_particular_period(company, start_date, end_date)
     if not is_it_last_sub_period:
         AMOUNT_OF_DATE_INCREASE_TRIES = 4
@@ -132,5 +132,5 @@ def _read_share_prices_per_particular_period(company, start_date, end_date):
     return [(row[1], row[3]) for row in data.fetchall()]
 
 def _read_db_share_price_in_particular_day(company, date):
-    fetched_share_price_data = try_to_fetch_prices_in_particular_period(company, date, date, True)
+    fetched_share_price_data = fetch_prices_in_particular_period(company, date, date, True)
     return None if len(fetched_share_price_data[0]) == 0 else fetched_share_price_data[0][0]
