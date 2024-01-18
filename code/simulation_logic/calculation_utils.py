@@ -29,6 +29,8 @@ def calculate_investment_value_change(companies_tickers_with_weights, is_it_last
 
 # UNIT TESTING
 
+# Todo: fix unit tests
+
 class TestCalculateChangeInSharePrice(unittest.TestCase):
 
     def test_increase_in_price(self):

@@ -19,6 +19,7 @@ def fetch_financial_data_for_given_companies(companies):
     ]
 
 # todo: optimise
+# todo: sometimes missing very last few days data.
 def fetch_total_amount_of_shares_on_particular_day(company, date):
     try:
         shares_data = yf.Ticker(company).get_shares_full(start=date)

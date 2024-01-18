@@ -1,6 +1,7 @@
 import datetime
+DATE_FORMAT = "%Y-%m-%d"
 
-def split_whole_period_into_chunks(start_date, end_date, sub_period_in_days, date_format):
+def split_whole_period_into_chunks(start_date, end_date, sub_period_in_days, date_format = DATE_FORMAT):
 
     # Initialize an empty list to hold the sub-periods
     sub_period_dates = []

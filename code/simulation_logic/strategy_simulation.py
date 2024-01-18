@@ -7,7 +7,6 @@ from simulation_logic.calculation_utils import calculate_investment_value_change
 from date_utils import split_whole_period_into_chunks
 from database_utils import fetch_necessary_data_for_experiment
 from simulation_logic.weights_factory import get_weights_for_bets_for_given_companies_for_given_date
-from constants import DATE_FORMAT
 
 def run_multiple_simulations(companies, start_date, end_date, attribute_of_decision_index, SUB_PERIOD_LENGTH_IN_DAYS_ARRAY):
     for sub_period_length_in_days in SUB_PERIOD_LENGTH_IN_DAYS_ARRAY:
@@ -24,7 +23,7 @@ def _run_simulation(companies, start_date, end_date, attribute_of_decision_index
     _present_simulation_results(change_in_value_of_money_invested_equally, change_in_value_of_money_invested_according_to_tested_strategy)
 
 def _perform_simulation_logic(companies, start_date, end_date, period_length_in_days, attribute_of_decision_index):
-    sub_period_dates = split_whole_period_into_chunks(start_date, end_date, period_length_in_days, DATE_FORMAT)
+    sub_period_dates = split_whole_period_into_chunks(start_date, end_date, period_length_in_days)
     original_money = 1000
     money = original_money
     for sub_period_start_date, sub_period_end_date in sub_period_dates:
