@@ -5,7 +5,7 @@ from unittest.mock import patch
 current_dir = os.path.dirname(os.path.abspath(__file__))
 parent_dir = os.path.dirname(current_dir)
 sys.path.insert(0, parent_dir)
-from database_utils import fetch_price_in_particular_period_dynamically
+from api_utils import fetch_price_in_particular_period_dynamically
 
 calculate_change_in_share_price = lambda first_day_price, last_day_price: (last_day_price - first_day_price)/first_day_price
 

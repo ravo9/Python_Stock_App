@@ -1,7 +1,6 @@
 from api_utils import fetch_financial_data_for_given_companies
 import sqlite3 as sl
 import yfinance as yf
-from datetime import datetime, timedelta
 
 SQL_QUERY_CREATE_TABLE_CASH_FLOW_STATEMENT = '''CREATE TABLE IF NOT EXISTS cash_flow_statement (company_name TEXT, end_date TEXT, filing_date TEXT, net_cash_flow REAL, PRIMARY KEY (company_name, end_date))'''
 SQL_QUERY_READ_ALL_CASH_FLOW_STATEMENT = 'SELECT * FROM cash_flow_statement'
@@ -36,26 +35,7 @@ def _initialize_database():
     with con:
         con.execute(SQL_QUERY_CREATE_TABLE_CASH_FLOW_STATEMENT)
 
-def fetch_price_in_particular_day_dynamically(company, date):
-    for _ in range(5):
-        share_prices_table = yf.download(company, start=date, end=(datetime.strptime(date, "%Y-%m-%d") + timedelta(days=1)), progress=False)
-        if not share_prices_table.empty:
-            averaged_price = (share_prices_table["High"] + share_prices_table["Low"]) / 2
-            final_results = averaged_price.tolist()
-            return final_results[0]
-        date = (datetime.strptime(date, "%Y-%m-%d") - timedelta(days=1)).strftime("%Y-%m-%d")
-    raise ValueError("No data available for the specified date after 5 attempts.")
-
-def fetch_price_in_particular_period_dynamically(company, start_date, end_date):
-    end_date = (datetime.strptime(end_date, "%Y-%m-%d") + timedelta(days=1)).strftime("%Y-%m-%d")
-    share_prices_table = yf.download(company, start=start_date, end=end_date, progress=False)
-    if not share_prices_table.empty:
-        averaged_prices = (share_prices_table["High"] + share_prices_table["Low"]) / 2
-        result = [averaged_prices.tolist()]
-        return result
-    raise ValueError("No data available for the specified date after 5 attempts.")
-
-def fetch_related_financial_reports(number_of_periods, company_ticker, date):
+def retrieve_related_financial_reports(number_of_periods, company_ticker, date):
     con = sl.connect(DATABASE_PATH)
     with con:
         most_recent_financial_reports_for_this_date = (con.execute(

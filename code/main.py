@@ -18,5 +18,5 @@ def find_out_value_per_dollar_spent_today_for_given_companies():
 
 # Main App
 # run_unit_tests()
-find_out_value_per_dollar_spent_today_for_given_companies()
-# run_multiple_simulations(COMPANIES_SET, START_DATE, END_DATE, ATTRIBUTE_OF_DECISION_INDEX, SUB_PERIOD_LENGTH_IN_DAYS_ARRAY)
+# find_out_value_per_dollar_spent_today_for_given_companies()
+run_multiple_simulations(COMPANIES_SET, START_DATE, END_DATE, ATTRIBUTE_OF_DECISION_INDEX, SUB_PERIOD_LENGTH_IN_DAYS_ARRAY)
