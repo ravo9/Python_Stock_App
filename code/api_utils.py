@@ -3,21 +3,13 @@ import yfinance as yf
 import requests
 from config import AMOUNT_OF_HISTORIC_REPORTS_TO_FETCH
 from datetime import datetime, timedelta
+import contextlib
+import os
 
 API_ENDPOINT = "https://api.polygon.io/vX/reference/financials"
 API_KEY = "KJSvMYzpmGOzks95qGHHL4THnEztfEbm"
 
 def fetch_financial_data_for_given_companies(companies):
-    # return [
-    #     (response.json(), company)
-    #     for company in companies
-    #     if (response := requests.get(API_ENDPOINT, params={
-    #         "apiKey": API_KEY,
-    #         "ticker": company,
-    #         "limit": AMOUNT_OF_HISTORIC_REPORTS_TO_FETCH + 1
-    #         # quarter vs annually
-    #     })).ok
-    # ]
     results = []
     for company in companies:
         try:
@@ -36,12 +28,13 @@ def fetch_financial_data_for_given_companies(companies):
 
 def fetch_price_in_particular_day_dynamically(company, date):
     for _ in range(5):
-        share_prices_table = yf.download(company, start=date, end=(datetime.strptime(date, "%Y-%m-%d") + timedelta(days=1)), progress=False)
-        if not share_prices_table.empty:
-            averaged_price = (share_prices_table["High"] + share_prices_table["Low"]) / 2
-            final_results = averaged_price.tolist()
-            return final_results[0]
-        date = (datetime.strptime(date, "%Y-%m-%d") - timedelta(days=1)).strftime("%Y-%m-%d")
+        with open(os.devnull, 'w') as devnull, contextlib.redirect_stdout(devnull), contextlib.redirect_stderr(devnull): # Mutes yfinance exceptions that are already handled.
+            share_prices_table = yf.download(company, start=date, end=(datetime.strptime(date, "%Y-%m-%d") + timedelta(days=1)), progress=False)
+            if not share_prices_table.empty:
+                averaged_price = (share_prices_table["High"] + share_prices_table["Low"]) / 2
+                final_results = averaged_price.tolist()
+                return final_results[0]
+            date = (datetime.strptime(date, "%Y-%m-%d") - timedelta(days=1)).strftime("%Y-%m-%d")
     raise ValueError("No data available for the specified date after 5 attempts.")
 
 def fetch_price_in_particular_period_dynamically(company, start_date, end_date):
