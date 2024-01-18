@@ -31,8 +31,3 @@ def split_whole_period_into_chunks(start_date, end_date, sub_period_in_days, dat
         sub_period_end_datetime += datetime.timedelta(days=sub_period_in_days)
 
     return sub_period_dates
-
-def increase_date_by_day(date, date_format):
-    date_formatted = datetime.datetime.strptime(date, date_format)
-    date_formatted_increased = date_formatted + datetime.timedelta(days=1)
-    return date_formatted_increased.strftime(date_format)

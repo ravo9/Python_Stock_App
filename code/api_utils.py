@@ -22,7 +22,6 @@ def fetch_financial_data_for_given_companies(companies):
 def fetch_total_amount_of_shares_on_particular_day(company, date):
     try:
         shares_data = yf.Ticker(company).get_shares_full(start=date)
-        print(shares_data)
         if shares_data is None:
             raise ValueError(f"No data returned for company {company} on {date}")
         return shares_data[0]
