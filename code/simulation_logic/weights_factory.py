@@ -21,7 +21,7 @@ def get_weights_for_bets_for_given_companies_for_given_date(companies, attribute
     print_average_value_per_dollar_for_given_companies_for_given_day(calculated_weights, date)
     return calculated_weights
 
-# Todo: maybe it would be useful to find out the average "value per dollar" at a given time on the market
+# Todo: it would be good to have also average over time (average of these averages)
 def print_average_value_per_dollar_for_given_companies_for_given_day(calculated_weights, date):
     if calculated_weights:
         total_value = sum(value for ticker, value in calculated_weights)

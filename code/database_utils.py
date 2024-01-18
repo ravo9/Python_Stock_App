@@ -1,4 +1,4 @@
-from api_utils import fetch_financial_data_for_given_companies
+from api_utils import fetch_financial_data
 import sqlite3 as sl
 import yfinance as yf
 
@@ -9,7 +9,7 @@ SQL_QUERY_MOST_RECENT_FINANCIAL_REPORTS = 'SELECT * FROM cash_flow_statement WHE
 DATABASE_PATH = "../database.db"
 
 def fetch_necessary_data_for_experiment(companies):
-    _save_financial_data_in_database(fetch_financial_data_for_given_companies(companies))
+    _save_financial_data_in_database(fetch_financial_data(companies))
     # read_all_data_from_database()
 
 def _save_financial_data_in_database(data_with_company_ticker):
