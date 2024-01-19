@@ -16,16 +16,16 @@ def fetch_financial_data(companies):
             yield (response.json(), company) if response.ok else print(f"Error fetching data: {company}: {response.status_code} - {response.reason}")
         except Exception as e: print(f"Request failed: {company} - {e}")
 
-def fetch_price_in_particular_day_dynamically(company, date):
+def fetch_price_in_particular_day_dynamically(company, date, date_format = "%Y-%m-%d"):
     for _ in range(5):
         with open(os.devnull, 'w') as devnull, contextlib.redirect_stdout(devnull), contextlib.redirect_stderr(devnull): # Mutes yfinance exceptions that are already handled.
-            share_prices_table = yf.download(company, start=date, end=(datetime.strptime(date, "%Y-%m-%d") + timedelta(days=1)), progress=False)
+            share_prices_table = yf.download(company, start=date, end=(datetime.strptime(date, date_format) + timedelta(days=1)), progress=False)
             if not share_prices_table.empty: return ((share_prices_table["High"] + share_prices_table["Low"]) / 2).tolist()[0]
-            date = (datetime.strptime(date, "%Y-%m-%d") - timedelta(days=1)).strftime("%Y-%m-%d")
+            date = (datetime.strptime(date, date_format) - timedelta(days=1)).strftime(date_format)
     raise ValueError("No data available for the specified date after 5 attempts.")
 
-def fetch_price_in_particular_period_dynamically(company, start_date, end_date):
-    end_date = (datetime.strptime(end_date, "%Y-%m-%d") + timedelta(days=1)).strftime("%Y-%m-%d")
+def fetch_price_in_particular_period_dynamically(company, start_date, end_date, date_format = "%Y-%m-%d"):
+    end_date = (datetime.strptime(end_date, date_format) + timedelta(days=1)).strftime(date_format)
     share_prices_table = yf.download(company, start=start_date, end=end_date, progress=False)
     if not share_prices_table.empty:
         averaged_prices = (share_prices_table["High"] + share_prices_table["Low"]) / 2
