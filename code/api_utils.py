@@ -1,6 +1,6 @@
 import yfinance as yf
 import requests
-from config import AMOUNT_OF_HISTORIC_REPORTS_TO_FETCH
+from config import NUMBER_OF_REPORTS_TO_FETCH_FROM_API
 from datetime import datetime, timedelta
 import contextlib
 import os
@@ -8,10 +8,11 @@ import os
 API_ENDPOINT = "https://api.polygon.io/vX/reference/financials"
 API_KEY = "KJSvMYzpmGOzks95qGHHL4THnEztfEbm"
 
+# NUMBER_OF_REPORTS_TO_FETCH_FROM_API doesn't work precisely. Sometimes fetches 1 or few reports less than should.
 def fetch_financial_data(companies):
     for company in companies:
         try:
-            response = requests.get(API_ENDPOINT, params={"apiKey": API_KEY, "ticker": company, "limit": AMOUNT_OF_HISTORIC_REPORTS_TO_FETCH + 1})
+            response = requests.get(API_ENDPOINT, params={"apiKey": API_KEY, "ticker": company, "limit": NUMBER_OF_REPORTS_TO_FETCH_FROM_API + 1})
             yield (response.json(), company) if response.ok else print(f"Error fetching data: {company}: {response.status_code} - {response.reason}")
         except Exception as e: print(f"Request failed: {company} - {e}")
 
@@ -34,6 +35,7 @@ def fetch_price_in_particular_period_dynamically(company, start_date, end_date):
     raise ValueError("No data available for the specified date after 5 attempts.")
 
 # Todo: optimise (not reason to fetch this whole table).
+# Todo: this is making problems with current date as date - delay around 10 days sometimes
 def fetch_total_amount_of_shares_on_particular_day(company, date):
     try:
         shares_data = yf.Ticker(company).get_shares_full(start=date) # Sometimes missing very last few days data.
