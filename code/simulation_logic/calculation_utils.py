@@ -29,8 +29,6 @@ def calculate_investment_value_change(companies_tickers_with_weights, is_it_last
 
 # UNIT TESTING
 
-# Todo: fix unit tests
-
 class TestCalculateChangeInSharePrice(unittest.TestCase):
 
     def test_increase_in_price(self):
@@ -48,7 +46,7 @@ class TestCalculateChangeInSharePrice(unittest.TestCase):
 
 class TestCalculateAverageSharePriceChange(unittest.TestCase):
 
-    @patch('simulation_logic.calculation_utils.fetch_prices_in_particular_period')
+    @patch('simulation_logic.calculation_utils.fetch_price_in_particular_period_dynamically')
     def test_average_price_increase(self, mock_fetch_prices):
         # Mock data: Prices increase for both companies
         mock_fetch_prices.side_effect = [
@@ -59,7 +57,7 @@ class TestCalculateAverageSharePriceChange(unittest.TestCase):
         average_change = calculate_average_share_price_change_for_given_companies_in_given_period(companies, '2021-01-01', '2021-01-31')
         self.assertAlmostEqual(average_change, 0.15, places=2) # Expecting 15% average increase
 
-    @patch('simulation_logic.calculation_utils.fetch_prices_in_particular_period')
+    @patch('simulation_logic.calculation_utils.fetch_price_in_particular_period_dynamically')
     def test_average_price_no_change(self, mock_fetch_prices):
         # Mock data: No price change for both companies
         mock_fetch_prices.side_effect = [
