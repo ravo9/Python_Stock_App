@@ -1,4 +1,3 @@
-import pandas
 import yfinance as yf
 import requests
 from config import AMOUNT_OF_HISTORIC_REPORTS_TO_FETCH
@@ -13,12 +12,8 @@ def fetch_financial_data(companies):
     for company in companies:
         try:
             response = requests.get(API_ENDPOINT, params={"apiKey": API_KEY, "ticker": company, "limit": AMOUNT_OF_HISTORIC_REPORTS_TO_FETCH + 1})
-            if response.ok:
-                yield response.json(), company
-            else:
-                print(f"Error fetching data for {company}: {response.status_code} - {response.reason}")
-        except requests.exceptions.RequestException as e:
-            print(f"Request failed: {company} - {e}")
+            yield (response.json(), company) if response.ok else print(f"Error fetching data: {company}: {response.status_code} - {response.reason}")
+        except Exception as e: print(f"Request failed: {company} - {e}")
 
 def fetch_price_in_particular_day_dynamically(company, date):
     for _ in range(5):
@@ -38,11 +33,10 @@ def fetch_price_in_particular_period_dynamically(company, start_date, end_date):
         return result
     raise ValueError("No data available for the specified date after 5 attempts.")
 
-# todo: optimise
-# todo: sometimes missing very last few days data.
+# Todo: optimise (not reason to fetch this whole table).
 def fetch_total_amount_of_shares_on_particular_day(company, date):
     try:
-        shares_data = yf.Ticker(company).get_shares_full(start=date)
+        shares_data = yf.Ticker(company).get_shares_full(start=date) # Sometimes missing very last few days data.
         if shares_data is None:
             raise ValueError(f"No data returned for company {company} on {date}")
         return shares_data[0]

@@ -1,12 +1,12 @@
 # COMPANIES_SET = ['TSLA', 'MSFT', 'NFLX', 'AMZN', 'GOOGL', 'PYPL', 'DIS', 'AAPL', 'SQ']
-COMPANIES_SET = ['TSLA', 'MSFT', 'NFLX']
+COMPANIES_SET = ['TSLA', 'MSFT']
 # COMPANIES_SET = []
 # NOT AVAILABLE ON POLYGON: SPOT
 
-START_DATE = '2022-01-01'
+START_DATE = '2023-10-01'
 # START_DATE = '2023-12-01'
 
-END_DATE = '2024-01-08'
+END_DATE = '2024-01-01'
 # Todo check: making problem with current date as END_DATE for
 # fetch_total_amount_of_shares_on_particular_day - delay around 10 days sometimes
 
