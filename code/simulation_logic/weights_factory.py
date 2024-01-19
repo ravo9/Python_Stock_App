@@ -17,7 +17,6 @@ def get_weights_for_bets_for_given_companies_for_given_date(companies, attribute
         average_value_of_decision_attribute_over_fetched_reports = sum(report[attribute_of_decision_index] for report in financial_reports) / len(financial_reports)
         value_per_dollar_spent = average_value_of_decision_attribute_over_fetched_reports / all_shares_amount / share_price_for_this_date
         calculated_weights.append((company_ticker, value_per_dollar_spent))
-
     print_average_value_per_dollar_for_given_companies_for_given_day(calculated_weights, date)
     return calculated_weights
 
