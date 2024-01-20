@@ -4,6 +4,7 @@ DATABASE_PATH = "../database.db"
 SQL_QUERY_CREATE_TABLE_CASH_FLOW_STATEMENT = '''CREATE TABLE IF NOT EXISTS cash_flow_statement (company_name TEXT, end_date TEXT, filing_date TEXT, net_cash_flow REAL, PRIMARY KEY (company_name, end_date))'''
 SQL_QUERY_READ_ALL_CASH_FLOW_STATEMENT = 'SELECT * FROM cash_flow_statement'
 SQL_QUERY_MOST_RECENT_FINANCIAL_REPORTS = 'SELECT * FROM cash_flow_statement WHERE company_name = ? AND filing_date <= ? ORDER BY filing_date DESC LIMIT ?'
+SQL_QUERY_EXISTING_REPORTS = "SELECT * FROM cash_flow_statement WHERE company_name = ?"
 
 def save_financial_data(data_with_company_ticker):
     _initialize_database()
@@ -21,6 +22,11 @@ def save_financial_data(data_with_company_ticker):
 
 def _initialize_database():
     with sl.connect(DATABASE_PATH) as con: con.execute(SQL_QUERY_CREATE_TABLE_CASH_FLOW_STATEMENT)
+
+def check_if_these_reports_are_already_stored(company, number_of_reports_intended_to_be_fetched):
+    with sl.connect(DATABASE_PATH) as con:
+        existing_reports = con.execute(SQL_QUERY_EXISTING_REPORTS, (company,)).fetchall()
+        return len(existing_reports) >= number_of_reports_intended_to_be_fetched
 
 def retrieve_related_financial_reports(number_of_periods, company_ticker, date):
     with sl.connect(DATABASE_PATH) as con:

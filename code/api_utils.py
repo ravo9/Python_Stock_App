@@ -2,6 +2,7 @@ import yfinance as yf
 import requests
 from config import NUMBER_OF_REPORTS_TO_FETCH_FROM_API
 from datetime import datetime, timedelta
+from database_utils import check_if_these_reports_are_already_stored
 import contextlib
 import os
 
@@ -10,9 +11,13 @@ API_KEY = "KJSvMYzpmGOzks95qGHHL4THnEztfEbm"
 
 # NUMBER_OF_REPORTS_TO_FETCH_FROM_API doesn't work precisely. Sometimes fetches 1 or few reports less than should.
 def fetch_financial_data(companies):
+    NUMBER_OF_REPORTS_TO_FETCH_FROM_API_ADJUSTED = NUMBER_OF_REPORTS_TO_FETCH_FROM_API + 1
     for company in companies:
         try:
-            response = requests.get(API_ENDPOINT, params={"apiKey": API_KEY, "ticker": company, "limit": NUMBER_OF_REPORTS_TO_FETCH_FROM_API + 1})
+            if (check_if_these_reports_are_already_stored(company, NUMBER_OF_REPORTS_TO_FETCH_FROM_API_ADJUSTED)):
+                print(f"Reports already exist for {company}")
+                continue
+            response = requests.get(API_ENDPOINT, params={"apiKey": API_KEY, "ticker": company, "limit": NUMBER_OF_REPORTS_TO_FETCH_FROM_API_ADJUSTED})
             yield (response.json(), company) if response.ok else print(f"Error fetching data: {company}: {response.status_code} - {response.reason}")
         except Exception as e: print(f"Request failed: {company} - {e}")
 
