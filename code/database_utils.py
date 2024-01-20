@@ -11,6 +11,11 @@ SQL_QUERY_CREATE_TABLE_SHARES_AMOUNT = '''CREATE TABLE IF NOT EXISTS SHARES_AMOU
 # SQL_QUERY_READ_ALL_SHARES_AMOUNT = 'SELECT * FROM SHARES_AMOUNT'
 SQL_QUERY_EXISTING_SHARES_AMOUNT = "SELECT shares_amount FROM SHARES_AMOUNT WHERE company_ticker = ? AND date = ?"
 
+SQL_QUERY_CREATE_TABLE_SHARE_PRICE = '''CREATE TABLE IF NOT EXISTS SHARE_PRICE (company_ticker TEXT, date TEXT, share_price REAL, PRIMARY KEY (company_ticker, date))'''
+# SQL_QUERY_READ_ALL_SHARE_PRICE = 'SELECT * FROM SHARE_PRICE'
+SQL_QUERY_EXISTING_SHARE_PRICE = "SELECT share_price FROM SHARE_PRICE WHERE company_ticker = ? AND date = ?"
+# Todo: separate query for multiple ones
+
 def save_financial_data(data_with_company_ticker):
     _initialize_database(SQL_QUERY_CREATE_TABLE_CASH_FLOW_STATEMENT)
     with sl.connect(DATABASE_PATH) as con:
@@ -23,7 +28,7 @@ def save_financial_data(data_with_company_ticker):
                 try: con.execute('INSERT OR REPLACE INTO cash_flow_statement VALUES (?, ?, ?, ?)', (
                     ticker, report['end_date'], report['filing_date'], cash_flow_statement['net_cash_flow']['value']
                 ))
-                except Exception as e: print(f"Error in save_fetched_data_into_database: {e}")
+                except Exception as e: print(f"Error in save_financial_data: {e}")
 
 def save_shares_amount_data(value, company, date):
     _initialize_database(SQL_QUERY_CREATE_TABLE_SHARES_AMOUNT)
@@ -31,7 +36,15 @@ def save_shares_amount_data(value, company, date):
         try: con.execute('INSERT OR REPLACE INTO SHARES_AMOUNT VALUES (?, ?, ?)', (
             company, date, int(value)
         ))
-        except Exception as e: print(f"Error in save_fetched_data_into_database: {e}")
+        except Exception as e: print(f"Error in save_shares_amount_data: {e}")
+
+def save_share_price_daily_data(value, company, date):
+    _initialize_database(SQL_QUERY_CREATE_TABLE_SHARE_PRICE)
+    with sl.connect(DATABASE_PATH) as con:
+        try: con.execute('INSERT OR REPLACE INTO SHARE_PRICE VALUES (?, ?, ?)', (
+            company, date, float(value)
+        ))
+        except Exception as e: print(f"Error in save_share_price_daily_data: {e}")
 
 def _initialize_database(sql_query):
     with sl.connect(DATABASE_PATH) as con: con.execute(sql_query)
@@ -44,6 +57,14 @@ def check_if_these_reports_are_already_stored(company, number_of_reports_intende
 def get_stored_shares_amount_value_if_available(company, date):
     with sl.connect(DATABASE_PATH) as con:
         try: stored_value = con.execute(SQL_QUERY_EXISTING_SHARES_AMOUNT, (company, date)).fetchall()
+        except Exception as e: return None
+        if stored_value != None and len(stored_value)>0 and len(stored_value[0])>0:
+            return stored_value[0][0]
+        else: return None
+
+def get_stored_share_price_value_if_available(company, date):
+    with sl.connect(DATABASE_PATH) as con:
+        try: stored_value = con.execute(SQL_QUERY_EXISTING_SHARE_PRICE, (company, date)).fetchall()
         except Exception as e: return None
         if stored_value != None and len(stored_value)>0 and len(stored_value[0])>0:
             return stored_value[0][0]
