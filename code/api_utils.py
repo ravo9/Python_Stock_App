@@ -39,9 +39,14 @@ def fetch_price_in_particular_period_dynamically(company, start_date, end_date, 
 
 # Todo: optimise (not reason to fetch this whole table).
 # Todo: this is making problems with current date as date - delay around 10 days sometimes
-def fetch_total_amount_of_shares_on_particular_day(company, date):
-    try:
-        shares_data = yf.Ticker(company).get_shares_full(start=date) # Sometimes missing very last few days data.
-        if shares_data is None: raise ValueError(f"No data returned for company {company} on {date}")
-        return shares_data[0]
-    except Exception as e: raise RuntimeError(f"An error occurred while fetching shares data: {e}")
+def fetch_total_amount_of_shares_on_particular_day(company, date_str):
+    date = datetime.strptime(date_str, '%Y-%m-%d')
+    attempts = 0
+    while attempts < 3:
+        try:
+            return yf.Ticker(company).get_shares_full(start=date.strftime('%Y-%m-%d'))[0] # Throws exception if no data found
+        except Exception as e:
+            print(f"No data returned for company {company} on {date} attempt {attempts + 1}")
+            date -= timedelta(weeks=1)
+            attempts += 1
+    return None
