@@ -15,7 +15,7 @@ def fetch_financial_data(companies):
     for company in companies:
         try:
             if (check_if_these_reports_are_already_stored(company, NUMBER_OF_REPORTS_TO_FETCH_FROM_API_ADJUSTED)):
-                print(f"Reports already exist for {company}")
+                # print(f"Reports already exist for {company}")
                 continue
             response = requests.get(API_ENDPOINT, params={"apiKey": API_KEY, "ticker": company, "limit": NUMBER_OF_REPORTS_TO_FETCH_FROM_API_ADJUSTED})
             yield (response.json(), company) if response.ok else print(f"Error fetching data: {company}: {response.status_code} - {response.reason}")
@@ -43,10 +43,9 @@ def fetch_total_amount_of_shares_on_particular_day(company, date_str):
     date = datetime.strptime(date_str, '%Y-%m-%d')
     attempts = 0
     while attempts < 3:
-        try:
-            return yf.Ticker(company).get_shares_full(start=date.strftime('%Y-%m-%d'))[0] # Throws exception if no data found
+        try: return yf.Ticker(company).get_shares_full(start=date.strftime('%Y-%m-%d'))[0] # Throws exception if no data found
         except Exception as e:
-            print(f"No data returned for company {company} on {date} attempt {attempts + 1}")
+            # print(f"No data returned for company {company} on {date} attempt {attempts + 1}")
             date -= timedelta(weeks=1)
             attempts += 1
     return None

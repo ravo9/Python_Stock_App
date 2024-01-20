@@ -13,7 +13,7 @@ def save_financial_data(data_with_company_ticker):
             for report in financial_data['results']:
                 cash_flow_statement = report.get('financials', {}).get('cash_flow_statement', {})
                 if 'filing_date' not in report or 'value' not in cash_flow_statement.get('net_cash_flow', {}):
-                    print(f"Missing data for report {ticker}. Skipping database save.") # add optional filing_date - if not null
+                    # print(f"Missing data for report {ticker}. Skipping database save.") # add optional filing_date - if not null
                     continue
                 try: con.execute('INSERT OR REPLACE INTO cash_flow_statement VALUES (?, ?, ?, ?)', (
                     ticker, report['end_date'], report['filing_date'], cash_flow_statement['net_cash_flow']['value']
