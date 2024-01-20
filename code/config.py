@@ -1,7 +1,7 @@
 POLYGON_AVAILABLE_COMPANIES_SET = [
     'TSLA', 'MSFT', 'NFLX', 'AMZN', 'GOOGL', # Tested
-    'PYPL', 'DIS', 'AAPL', 'SQ', 'NVDA', # Tested
-    # 'KO', 'VZ', 'PTON', 'MRNA', 'META', # Tested
+    # 'DIS', 'AAPL', 'SQ', 'NVDA', 'META', # Tested
+    # 'KO', 'VZ', 'PTON', 'MRNA', 'PYPL', # Tested
     # 'PLTR', 'ALPP', 'BLK', 'BYND', # Tested
     # 'BRK.B', # Issues
 ]
@@ -14,3 +14,4 @@ END_DATE = '2024-01-18'
 SUB_PERIOD_LENGTH_IN_DAYS_ARRAY = [20]
 NUMBER_OF_REPORTS_TAKEN_FOR_CALCULATION = 4
 NUMBER_OF_REPORTS_TO_FETCH_FROM_API = 10 # Todo: automate it
+MISSING_REPORTS_MARGIN = 5 # Not great
