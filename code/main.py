@@ -24,5 +24,5 @@ def run_profiler():
 # Main App
 # run_unit_tests()
 # find_out_value_per_dollar_spent_today_for_given_companies()
-# run_profiler()
-run_multiple_simulations(COMPANIES_SET, START_DATE, END_DATE, SUB_PERIOD_LENGTH_IN_DAYS_ARRAY)
+run_profiler()
+# run_multiple_simulations(COMPANIES_SET, START_DATE, END_DATE, SUB_PERIOD_LENGTH_IN_DAYS_ARRAY)
