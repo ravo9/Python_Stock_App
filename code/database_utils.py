@@ -8,17 +8,21 @@ SQL_QUERY_MOST_RECENT_FINANCIAL_REPORTS = 'SELECT * FROM cash_flow_statement WHE
 SQL_QUERY_EXISTING_REPORTS = "SELECT * FROM cash_flow_statement WHERE company_name = ?"
 
 SQL_QUERY_CREATE_TABLE_SHARES_AMOUNT = '''CREATE TABLE IF NOT EXISTS SHARES_AMOUNT (company_ticker TEXT, date TEXT, shares_amount REAL, PRIMARY KEY (company_ticker, date))'''
-# SQL_QUERY_READ_ALL_SHARES_AMOUNT = 'SELECT * FROM SHARES_AMOUNT'
+SQL_QUERY_READ_ALL_SHARES_AMOUNT = 'SELECT * FROM SHARES_AMOUNT'
 SQL_QUERY_EXISTING_SHARES_AMOUNT = "SELECT shares_amount FROM SHARES_AMOUNT WHERE company_ticker = ? AND date = ?"
 
 SQL_QUERY_CREATE_TABLE_SHARE_PRICE = '''CREATE TABLE IF NOT EXISTS SHARE_PRICE (company_ticker TEXT, date TEXT, share_price REAL, PRIMARY KEY (company_ticker, date))'''
-# SQL_QUERY_READ_ALL_SHARE_PRICE = 'SELECT * FROM SHARE_PRICE'
+SQL_QUERY_READ_ALL_SHARE_PRICE = 'SELECT * FROM SHARE_PRICE'
 SQL_QUERY_EXISTING_SHARE_PRICE = "SELECT share_price FROM SHARE_PRICE WHERE company_ticker = ? AND date = ?"
 
 SQL_QUERY_CREATE_TABLE_SHARE_PRICES_IN_PERIOD = '''CREATE TABLE IF NOT EXISTS SHARE_PRICES_IN_PERIOD (company_ticker TEXT, start_date TEXT, end_date TEXT, data TEXT, PRIMARY KEY (company_ticker, start_date, end_date))'''
-# SQL_QUERY_READ_ALL_SHARE_PRICES_IN_PERIOD = 'SELECT * FROM SHARE_PRICES_IN_PERIOD'
+SQL_QUERY_READ_ALL_SHARE_PRICES_IN_PERIOD = 'SELECT * FROM SHARE_PRICES_IN_PERIOD'
 SQL_QUERY_EXISTING_SHARE_PRICES_IN_PERIOD = "SELECT data FROM SHARE_PRICES_IN_PERIOD WHERE company_ticker = ? AND start_date = ? AND end_date = ?"
 
+def _initialize_database(sql_query):
+    with sl.connect(DATABASE_PATH) as con: con.execute(sql_query)
+
+# Todo: refactor
 def save_financial_data(data_with_company_ticker):
     _initialize_database(SQL_QUERY_CREATE_TABLE_CASH_FLOW_STATEMENT)
     with sl.connect(DATABASE_PATH) as con:
@@ -57,13 +61,18 @@ def save_share_prices_in_period_data(company, start_date, end_date, data):
         ))
         except Exception as e: print(f"Error in save_share_price_daily_data: {e}")
 
-def _initialize_database(sql_query):
-    with sl.connect(DATABASE_PATH) as con: con.execute(sql_query)
-
+# Todo: refactor
 def check_if_these_reports_are_already_stored(company, number_of_reports_intended_to_be_fetched):
     with sl.connect(DATABASE_PATH) as con:
         existing_reports = con.execute(SQL_QUERY_EXISTING_REPORTS, (company,)).fetchall()
         return len(existing_reports) >= number_of_reports_intended_to_be_fetched
+
+def retrieve_related_financial_reports(number_of_periods, company_ticker, date):
+    with sl.connect(DATABASE_PATH) as con:
+        recent_reports = con.execute(SQL_QUERY_MOST_RECENT_FINANCIAL_REPORTS, (company_ticker, date, number_of_periods)).fetchall()
+    if not recent_reports: raise ValueError("ERROR: Empty list")
+    return recent_reports
+
 
 def get_stored_shares_amount_value_if_available(company, date):
     with sl.connect(DATABASE_PATH) as con:
@@ -89,15 +98,16 @@ def get_stored_share_prices_in_period_if_available(company, start_date, end_date
             return stored_value[0][0]
         else: return None
 
-def retrieve_related_financial_reports(number_of_periods, company_ticker, date):
-    with sl.connect(DATABASE_PATH) as con:
-        recent_reports = con.execute(SQL_QUERY_MOST_RECENT_FINANCIAL_REPORTS, (company_ticker, date, number_of_periods)).fetchall()
-    if not recent_reports: raise ValueError("ERROR: Empty list")
-    return recent_reports
-
-def read_all_data_from_database():
-    with sl.connect(DATABASE_PATH) as con:
-        cursor = con.execute(SQL_QUERY_READ_ALL_CASH_FLOW_STATEMENT)
-        print("TABLE: cash_flow_statement")
-        print([description[0] for description in cursor.description]) # Headers
-        for row in cursor: print(row)
+# def read_all_data_from_database():
+#     queries = {
+#         SQL_QUERY_READ_ALL_CASH_FLOW_STATEMENT,
+#         SQL_QUERY_READ_ALL_SHARES_AMOUNT,
+#         SQL_QUERY_READ_ALL_SHARE_PRICE,
+#         SQL_QUERY_READ_ALL_SHARE_PRICES_IN_PERIOD
+#     }
+#     for query in queries:
+#         with sl.connect(DATABASE_PATH) as con:
+#             cursor = con.execute(query)
+#             # print("TABLE: cash_flow_statement")
+#             print([description[0] for description in cursor.description]) # Headers
+#             for row in cursor: print(row)

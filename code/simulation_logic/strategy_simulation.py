@@ -6,7 +6,7 @@ sys.path.insert(0, parent_dir)
 from simulation_logic.calculation_utils import calculate_investment_value_change, calculate_average_share_price_change_for_given_companies_in_given_period
 from date_utils import split_whole_period_into_chunks
 from api_utils import fetch_financial_data
-from database_utils import save_financial_data, read_all_data_from_database
+from database_utils import save_financial_data #read_all_data_from_database
 from simulation_logic.weights_factory import get_weights_for_bets_for_given_companies_for_given_date
 
 def run_multiple_simulations(companies, start_date, end_date, SUB_PERIOD_LENGTH_IN_DAYS_ARRAY):

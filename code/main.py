@@ -3,7 +3,7 @@ from config import COMPANIES_SET, START_DATE, END_DATE, SUB_PERIOD_LENGTH_IN_DAY
 import unittest
 from simulation_logic.calculation_utils import TestCalculateChangeInSharePrice, TestCalculateAverageSharePriceChange
 from simulation_logic.weights_factory import get_weights_for_bets_for_given_companies_for_given_date
-from database_utils import read_all_data_from_database
+# from database_utils import read_all_data_from_database
 import cProfile
 import pstats
 
