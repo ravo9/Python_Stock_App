@@ -7,39 +7,43 @@ from simulation_logic.calculation_utils import calculate_investment_value_change
 from date_utils import split_whole_period_into_chunks
 from simulation_logic.weights_factory import get_weights_for_bets_for_given_companies_for_given_date
 
-def run_multiple_simulations(companies, start_date, end_date, SUB_PERIOD_LENGTH_IN_DAYS_ARRAY):
+def run_multiple_simulations(companies, start_date, end_date, SUB_PERIOD_LENGTH_IN_DAYS_ARRAY, NUMBER_OF_REPORTS_TAKEN_FOR_CALCULATION_ARRAY):
     for sub_period_length in SUB_PERIOD_LENGTH_IN_DAYS_ARRAY:
-        _run_simulation(companies, start_date, end_date, sub_period_length)
+        for number_of_reports_for_calculation in NUMBER_OF_REPORTS_TAKEN_FOR_CALCULATION_ARRAY:
+            _run_simulation(companies, start_date, end_date, sub_period_length, number_of_reports_for_calculation)
 
-def _run_simulation(companies, start_date, end_date, period_length_in_days):
+def _run_simulation(companies, start_date, end_date, period_length_in_days, number_of_reports_for_calculation):
     # Get back in time. Invest given money (e.g. $100) in given companies equally ($100 each) - tested manually on paper.
     change_in_value_of_money_invested_equally = calculate_average_share_price_change_for_given_companies_in_given_period(companies, start_date, end_date)
     # Get back in time. Invest given money given companies not equally, but accordingly to the tested strategy (expressed by bets/ weights values).
-    change_in_value_of_money_invested_by_using_tested_strategy = _perform_simulation_logic(companies, start_date, end_date, period_length_in_days)
+    change_in_value_of_money_invested_by_using_tested_strategy = _perform_simulation_logic(companies, start_date, end_date, period_length_in_days, number_of_reports_for_calculation)
     _present_simulation_results(change_in_value_of_money_invested_equally, change_in_value_of_money_invested_by_using_tested_strategy)
 
-def _perform_simulation_logic(companies, start_date, end_date, period_length_in_days):
+def _perform_simulation_logic(companies, start_date, end_date, period_length_in_days, number_of_reports_for_calculation):
     sub_period_dates = split_whole_period_into_chunks(start_date, end_date, period_length_in_days)
     original_money = 1000
     money = original_money
-    # Todo: it would be good to have also average over time (average of these averages)
-    # average_value_per_dollar_spent_across_sub_periods = 0.0
     acc = 1
     for sub_period_start_date, sub_period_end_date in sub_period_dates:
-        progress = acc / len(sub_period_dates) * 100
-        print(f"{progress:.2f}%", end='\r')
+        print(f"{(acc / len(sub_period_dates) * 100):.2f}%", end='\r')
         acc += 1
-        sub_period_weights = get_weights_for_bets_for_given_companies_for_given_date(companies, sub_period_start_date)
-        # average_value = average_real_value_per_dollar(sub_period_weights, sub_period_start_date)
-        # print_average_value_per_dollar_for_companies_for_given_day(sub_period_weights, sub_period_start_date, average_value)
-        # average_value_per_dollar_spent_across_sub_periods += average_value
+        sub_period_weights = get_weights_for_bets_for_given_companies_for_given_date(companies, sub_period_start_date, number_of_reports_for_calculation)
         investment_change = calculate_investment_value_change(sub_period_weights, (sub_period_end_date == end_date), sub_period_start_date, sub_period_end_date)
         money *= (1 + investment_change)
-    # print("AVERAGE VALUE PER DOLLAR SPENT ACROSS WHOLE PERIOD: " + str(average_value_per_dollar_spent_across_sub_periods/len(sub_period_dates)))
     return (money - original_money)/ original_money
 
-def print_average_value_per_dollar_for_companies_for_given_day(calculated_weights, date, average_value):
-    if calculated_weights: print(f"Average value per dollar spent for given companies on {date} : {average_value}")
+def calculate_average_market_value_per_dollar(companies, start_date, end_date, period_length_in_days, number_of_reports_for_calculation):
+    sub_period_dates = split_whole_period_into_chunks(start_date, end_date, period_length_in_days)
+    average_value_per_dollar_spent_across_sub_periods = 0.0
+    acc = 1
+    for sub_period_start_date, sub_period_end_date in sub_period_dates:
+        print(f"{(acc / len(sub_period_dates) * 100):.2f}%", end='\r')
+        acc += 1
+        sub_period_weights = get_weights_for_bets_for_given_companies_for_given_date(companies, sub_period_start_date, number_of_reports_for_calculation)
+        average_value = average_real_value_per_dollar(sub_period_weights, sub_period_start_date)
+        if sub_period_weights: print(f"Average value per dollar spent for given companies on {sub_period_start_date} : {average_value}")
+        average_value_per_dollar_spent_across_sub_periods += average_value
+    print("AVERAGE VALUE PER DOLLAR SPENT ACROSS WHOLE PERIOD: " + str(average_value_per_dollar_spent_across_sub_periods/len(sub_period_dates)))
 
 def average_real_value_per_dollar(real_values, date):
     if not real_values: return None

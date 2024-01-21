@@ -1,8 +1,35 @@
 import yfinance as yf
 from datetime import datetime, timedelta
-from database_utils import save_shares_amount_data, save_share_price_daily_data, save_share_prices_in_period_data
+from database_utils import save_financial_data, save_shares_amount_data, save_share_price_daily_data, save_share_prices_in_period_data, DATABASE_PATH, SQL_QUERY_MOST_RECENT_FINANCIAL_REPORTS
 import contextlib
+import requests
 import os
+import sqlite3 as sl
+import json
+import time
+
+API_ENDPOINT = "https://api.polygon.io/vX/reference/financials"
+API_KEY = "KJSvMYzpmGOzks95qGHHL4THnEztfEbm"
+
+DOWNLOADING_FROM_POLYGON_ACC = 0
+
+def fetch_financial_reports(company_ticker, number_of_reports_for_calculations, number_of_reports_to_fetch, date):
+    global DOWNLOADING_FROM_POLYGON_ACC
+    try:
+        if (DOWNLOADING_FROM_POLYGON_ACC == 5):
+            print("WAITING FOR DOWNLOAD 60 SECONDS")
+            time.sleep(60)
+            DOWNLOADING_FROM_POLYGON_ACC = 0
+        print("DOWNLOADING: " + company_ticker)
+        DOWNLOADING_FROM_POLYGON_ACC += 1
+        response = requests.get(API_ENDPOINT, params={"apiKey": API_KEY, "ticker": company_ticker, "timeframe": "quarterly", "limit": number_of_reports_to_fetch})
+        save_financial_data(response.json(), company_ticker) if response.ok else print(f"Error fetching data: {company_ticker}: {response.status_code} - {response.reason}")
+        recent_reports = None
+        with sl.connect(DATABASE_PATH) as con:
+            recent_reports = con.execute(SQL_QUERY_MOST_RECENT_FINANCIAL_REPORTS, (company_ticker, date, number_of_reports_for_calculations)).fetchall()
+        if not recent_reports: raise ValueError("ERROR: Empty list")
+        return recent_reports
+    except Exception as e: print(f"Request failed: {company_ticker} - {e}")
 
 def fetch_share_price_daily(company, date, date_format = "%Y-%m-%d"):
     for _ in range(5):

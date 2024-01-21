@@ -1,7 +1,12 @@
-from database_utils import get_stored_share_price_value_if_available, get_stored_share_prices_in_period_if_available, get_stored_shares_amount_value_if_available
-from api_utils import fetch_share_price_daily, fetch_share_prices_per_period, fetch_total_amount_of_shares_on_particular_day
+from database_utils import get_stored_share_price_value_if_available, get_stored_share_prices_in_period_if_available, get_stored_shares_amount_value_if_available, get_stored_financial_reports_if_available
+from api_utils import fetch_share_price_daily, fetch_share_prices_per_period, fetch_total_amount_of_shares_on_particular_day, fetch_financial_reports
 from datetime import datetime, timedelta
 import json
+
+def retrieve_financial_reports(number_of_reports_for_calculations, number_of_reports_to_fetch, company_ticker, date):
+    stored_value = get_stored_financial_reports_if_available(number_of_reports_for_calculations, number_of_reports_to_fetch, company_ticker, date)
+    if stored_value != None: return stored_value
+    return fetch_financial_reports(company_ticker, number_of_reports_for_calculations, number_of_reports_to_fetch, date)
 
 def retrieve_share_price_daily(company, date, date_format = "%Y-%m-%d"):
     stored_value = get_stored_share_price_value_if_available(company, date) # Caching

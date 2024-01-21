@@ -1,104 +1,81 @@
 import sqlite3 as sl
-import requests
-
-API_ENDPOINT = "https://api.polygon.io/vX/reference/financials"
-API_KEY = "KJSvMYzpmGOzks95qGHHL4THnEztfEbm"
-
-DATABASE_PATH = "../database.db"
 
 SQL_QUERY_CREATE_TABLE_CASH_FLOW_STATEMENT = '''CREATE TABLE IF NOT EXISTS cash_flow_statement (company_name TEXT, date TEXT, net_cash_flow REAL, PRIMARY KEY (company_name, date))'''
-SQL_QUERY_READ_ALL_CASH_FLOW_STATEMENT = 'SELECT * FROM cash_flow_statement'
-SQL_QUERY_MOST_RECENT_FINANCIAL_REPORTS = 'SELECT * FROM cash_flow_statement WHERE company_name = ? AND date <= ? ORDER BY date DESC LIMIT ?'
-SQL_QUERY_EXISTING_REPORTS = "SELECT * FROM cash_flow_statement WHERE company_name = ?"
-
 SQL_QUERY_CREATE_TABLE_SHARES_AMOUNT = '''CREATE TABLE IF NOT EXISTS SHARES_AMOUNT (company_ticker TEXT, date TEXT, shares_amount REAL, PRIMARY KEY (company_ticker, date))'''
-SQL_QUERY_READ_ALL_SHARES_AMOUNT = 'SELECT * FROM SHARES_AMOUNT'
-SQL_QUERY_EXISTING_SHARES_AMOUNT = "SELECT shares_amount FROM SHARES_AMOUNT WHERE company_ticker = ? AND date = ?"
-
 SQL_QUERY_CREATE_TABLE_SHARE_PRICE = '''CREATE TABLE IF NOT EXISTS SHARE_PRICE (company_ticker TEXT, date TEXT, share_price REAL, PRIMARY KEY (company_ticker, date))'''
-SQL_QUERY_READ_ALL_SHARE_PRICE = 'SELECT * FROM SHARE_PRICE'
-SQL_QUERY_EXISTING_SHARE_PRICE = "SELECT share_price FROM SHARE_PRICE WHERE company_ticker = ? AND date = ?"
-
 SQL_QUERY_CREATE_TABLE_SHARE_PRICES_IN_PERIOD = '''CREATE TABLE IF NOT EXISTS SHARE_PRICES_IN_PERIOD (company_ticker TEXT, start_date TEXT, end_date TEXT, data TEXT, PRIMARY KEY (company_ticker, start_date, end_date))'''
-SQL_QUERY_READ_ALL_SHARE_PRICES_IN_PERIOD = 'SELECT * FROM SHARE_PRICES_IN_PERIOD'
+SQL_QUERY_EXISTING_REPORTS = "SELECT * FROM cash_flow_statement WHERE company_name = ?"
+SQL_QUERY_EXISTING_SHARES_AMOUNT = "SELECT shares_amount FROM SHARES_AMOUNT WHERE company_ticker = ? AND date = ?"
+SQL_QUERY_EXISTING_SHARE_PRICE = "SELECT share_price FROM SHARE_PRICE WHERE company_ticker = ? AND date = ?"
 SQL_QUERY_EXISTING_SHARE_PRICES_IN_PERIOD = "SELECT data FROM SHARE_PRICES_IN_PERIOD WHERE company_ticker = ? AND start_date = ? AND end_date = ?"
+SQL_QUERY_MOST_RECENT_FINANCIAL_REPORTS = 'SELECT * FROM cash_flow_statement WHERE company_name = ? AND date <= ? ORDER BY date DESC LIMIT ?'
+SQL_READING_ALL_QUERIES = {
+    'SELECT * FROM cash_flow_statement',
+    'SELECT * FROM SHARES_AMOUNT',
+    'SELECT * FROM SHARE_PRICE',
+    'SELECT * FROM SHARE_PRICES_IN_PERIOD'
+}
+DATABASE_PATH = "../database.db"
 
 def _initialize_database(sql_query):
     with sl.connect(DATABASE_PATH) as con: con.execute(sql_query)
 
 def save_financial_data(financial_data, ticker):
-    _initialize_database(SQL_QUERY_CREATE_TABLE_CASH_FLOW_STATEMENT)
-    with sl.connect(DATABASE_PATH) as con:
-        print("Amount of elements for saving: " + str(len(financial_data['results'])))
-        for report in financial_data['results']:
-            cash_flow_statement = report.get('financials', {}).get('cash_flow_statement', {})
-            date = report['filing_date'] if 'filing_date' in report else report['end_date']
-            try: con.execute('INSERT OR REPLACE INTO cash_flow_statement VALUES (?, ?, ?)', (
-                ticker, date, cash_flow_statement['net_cash_flow']['value']
-            ))
-            except Exception as e: print(f"Error in save_financial_data: {e}")
+    insert_query = 'INSERT OR REPLACE INTO cash_flow_statement VALUES (?, ?, ?)'
+    for report in financial_data['results']:
+        cash_flow_statement = report.get('financials', {}).get('cash_flow_statement', {})
+        date = report['filing_date'] if 'filing_date' in report else report['end_date']
+        value = cash_flow_statement['net_cash_flow']['value'] if 'net_cash_flow' in cash_flow_statement and 'value' in cash_flow_statement['net_cash_flow'] else None
+        _save_data_to_database(SQL_QUERY_CREATE_TABLE_CASH_FLOW_STATEMENT, insert_query, value, ticker, date)
 
 def save_shares_amount_data(value, company, date):
-    _initialize_database(SQL_QUERY_CREATE_TABLE_SHARES_AMOUNT)
-    with sl.connect(DATABASE_PATH) as con:
-        try: con.execute('INSERT OR REPLACE INTO SHARES_AMOUNT VALUES (?, ?, ?)', (
-            company, date, int(value)
-        ))
-        except Exception as e: print(f"Error in save_shares_amount_data: {e}")
+    insert_query = 'INSERT OR REPLACE INTO SHARES_AMOUNT VALUES (?, ?, ?)'
+    _save_data_to_database(SQL_QUERY_CREATE_TABLE_SHARES_AMOUNT, insert_query, int(value), company, date)
 
 def save_share_price_daily_data(value, company, date):
-    _initialize_database(SQL_QUERY_CREATE_TABLE_SHARE_PRICE)
+    insert_query = 'INSERT OR REPLACE INTO SHARE_PRICE VALUES (?, ?, ?)'
+    _save_data_to_database(SQL_QUERY_CREATE_TABLE_SHARE_PRICE, insert_query, float(value), company, date)
+
+def _save_data_to_database(init_query, insert_query, value, company, date):
+    _initialize_database(init_query)
     with sl.connect(DATABASE_PATH) as con:
-        try: con.execute('INSERT OR REPLACE INTO SHARE_PRICE VALUES (?, ?, ?)', (
-            company, date, float(value)
-        ))
-        except Exception as e: print(f"Error in save_share_price_daily_data: {e}")
+        try: con.execute(insert_query, (company, date, value))
+        except Exception as e: print(f"Error in _save_data_to_database: {e}")
 
 def save_share_prices_in_period_data(company, start_date, end_date, data):
     _initialize_database(SQL_QUERY_CREATE_TABLE_SHARE_PRICES_IN_PERIOD)
     with sl.connect(DATABASE_PATH) as con:
-        try: con.execute('INSERT OR REPLACE INTO SHARE_PRICES_IN_PERIOD VALUES (?, ?, ?, ?)', (
-            company, start_date, end_date, data
-        ))
+        try: con.execute('INSERT OR REPLACE INTO SHARE_PRICES_IN_PERIOD VALUES (?, ?, ?, ?)', (company, start_date, end_date, data))
         except Exception as e: print(f"Error in save_share_price_daily_data: {e}")
 
-# Todo: improve
-def get_stored_financial_reports_if_available(number_of_reports_used_for_calculations, number_of_reports_intended_to_be_fetched, company_ticker, date):
+def get_stored_financial_reports_if_available(number_of_reports_for_calculations, number_of_reports_to_fetch, company_ticker, date):
     with sl.connect(DATABASE_PATH) as con:
         are_reports_stored = False
         try:
             existing_reports = con.execute(SQL_QUERY_EXISTING_REPORTS, (company_ticker,)).fetchall()
-            are_reports_stored = len(existing_reports) >= number_of_reports_intended_to_be_fetched
-        except Exception as e: None
-        if are_reports_stored != False:
-            recent_reports = con.execute(SQL_QUERY_MOST_RECENT_FINANCIAL_REPORTS, (company_ticker, date, number_of_reports_used_for_calculations)).fetchall()
-            if not recent_reports: raise ValueError("ERROR: Empty list")
-            return recent_reports
-        else:
+            are_reports_stored = len(existing_reports) >= number_of_reports_to_fetch
+        except Exception as e: return None
+        if are_reports_stored:
             try:
-                response = requests.get(API_ENDPOINT, params={"apiKey": API_KEY, "ticker": company_ticker, "timeframe": "quarterly", "limit": number_of_reports_intended_to_be_fetched})
-                save_financial_data(response.json(), company_ticker) if response.ok else print(f"Error fetching data: {company_ticker}: {response.status_code} - {response.reason}")
-
-                # repetition - to be optimized
-                recent_reports = con.execute(SQL_QUERY_MOST_RECENT_FINANCIAL_REPORTS, (company_ticker, date, number_of_reports_used_for_calculations)).fetchall()
+                recent_reports = con.execute(SQL_QUERY_MOST_RECENT_FINANCIAL_REPORTS, (
+                    company_ticker, date, number_of_reports_for_calculations
+                )).fetchall()
                 if not recent_reports: raise ValueError("ERROR: Empty list")
                 return recent_reports
             except Exception as e: print(f"Request failed: {company_ticker} - {e}")
+        return None
 
 def get_stored_shares_amount_value_if_available(company, date):
-    with sl.connect(DATABASE_PATH) as con:
-        try: stored_value = con.execute(SQL_QUERY_EXISTING_SHARES_AMOUNT, (company, date)).fetchall()
-        except Exception as e: return None
-        if stored_value != None and len(stored_value)>0 and len(stored_value[0])>0:
-            return stored_value[0][0]
-        else: return None
+    return _get_stored_value_if_available(SQL_QUERY_EXISTING_SHARES_AMOUNT, company, date)
 
 def get_stored_share_price_value_if_available(company, date):
+    return _get_stored_value_if_available(SQL_QUERY_EXISTING_SHARE_PRICE, company, date)
+
+def _get_stored_value_if_available(query, company, date):
     with sl.connect(DATABASE_PATH) as con:
-        try: stored_value = con.execute(SQL_QUERY_EXISTING_SHARE_PRICE, (company, date)).fetchall()
+        try: stored_value = con.execute(query, (company, date)).fetchall()
         except Exception as e: return None
-        if stored_value != None and len(stored_value)>0 and len(stored_value[0])>0:
-            return stored_value[0][0]
+        if stored_value != None and len(stored_value)>0 and len(stored_value[0])>0: return stored_value[0][0]
         else: return None
 
 def get_stored_share_prices_in_period_if_available(company, start_date, end_date):
@@ -110,19 +87,12 @@ def get_stored_share_prices_in_period_if_available(company, start_date, end_date
         else: return None
 
 def read_all_data_from_database():
-    queries = {
-        SQL_QUERY_READ_ALL_CASH_FLOW_STATEMENT,
-        # SQL_QUERY_READ_ALL_SHARES_AMOUNT,
-        # SQL_QUERY_READ_ALL_SHARE_PRICE,
-        # SQL_QUERY_READ_ALL_SHARE_PRICES_IN_PERIOD
-    }
-    for query in queries:
+    for query in SQL_READING_ALL_QUERIES:
         acc = 0
         with sl.connect(DATABASE_PATH) as con:
             cursor = con.execute(query)
-            # print("TABLE: cash_flow_statement")
             # print([description[0] for description in cursor.description]) # Headers
-            # for row in cursor: print(row)
             for row in cursor:
+                # print(row)
                 acc += 1
         print("Amount of elements: " + str(acc))
