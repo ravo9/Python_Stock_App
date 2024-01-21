@@ -5,8 +5,6 @@ parent_dir = os.path.dirname(current_dir)
 sys.path.insert(0, parent_dir)
 from simulation_logic.calculation_utils import calculate_investment_value_change, calculate_average_share_price_change_for_given_companies_in_given_period
 from date_utils import split_whole_period_into_chunks
-from api_utils import fetch_financial_data
-from database_utils import save_financial_data #read_all_data_from_database
 from simulation_logic.weights_factory import get_weights_for_bets_for_given_companies_for_given_date
 
 def run_multiple_simulations(companies, start_date, end_date, SUB_PERIOD_LENGTH_IN_DAYS_ARRAY):
@@ -14,7 +12,6 @@ def run_multiple_simulations(companies, start_date, end_date, SUB_PERIOD_LENGTH_
         _run_simulation(companies, start_date, end_date, sub_period_length)
 
 def _run_simulation(companies, start_date, end_date, period_length_in_days):
-    fetch_necessary_data_for_experiment(companies)
     # Get back in time. Invest given money (e.g. $100) in given companies equally ($100 each) - tested manually on paper.
     change_in_value_of_money_invested_equally = calculate_average_share_price_change_for_given_companies_in_given_period(companies, start_date, end_date)
     # Get back in time. Invest given money given companies not equally, but accordingly to the tested strategy (expressed by bets/ weights values).
@@ -40,10 +37,6 @@ def _perform_simulation_logic(companies, start_date, end_date, period_length_in_
         money *= (1 + investment_change)
     # print("AVERAGE VALUE PER DOLLAR SPENT ACROSS WHOLE PERIOD: " + str(average_value_per_dollar_spent_across_sub_periods/len(sub_period_dates)))
     return (money - original_money)/ original_money
-
-def fetch_necessary_data_for_experiment(companies):
-    save_financial_data(fetch_financial_data(companies))
-    # read_all_data_from_database()
 
 def print_average_value_per_dollar_for_companies_for_given_day(calculated_weights, date, average_value):
     if calculated_weights: print(f"Average value per dollar spent for given companies on {date} : {average_value}")
