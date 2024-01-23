@@ -20,9 +20,9 @@ def calculate_average_share_price_change_for_given_companies_in_given_period(com
 
 def calculate_investment_value_change(companies_tickers_with_weights, is_it_last_sub_period, start_date, end_date):
     change_in_invested_money = 0.0
-    sum_of_all_bets = sum(weight for _, weight in companies_tickers_with_weights)
-    for company_ticker, company_bet_weight in companies_tickers_with_weights:
-        share_prices_table = retrieve_share_prices_per_period(company_ticker, start_date, end_date)
+    sum_of_all_bets = sum(abs(weight) for _, weight in companies_tickers_with_weights)
+    for ticker, company_bet_weight in companies_tickers_with_weights:
+        share_prices_table = retrieve_share_prices_per_period(ticker, start_date, end_date)
         first_day_price, last_day_price = share_prices_table[0][0], share_prices_table[0][-1]
         change_in_invested_money += calculate_change_in_share_price(first_day_price, last_day_price) * company_bet_weight / sum_of_all_bets
     return change_in_invested_money
