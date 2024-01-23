@@ -11,7 +11,7 @@ def run_unit_tests():
     unittest.main()
 
 def find_out_value_per_dollar_spent_today_for_given_companies():
-    weights_today = get_weights_for_bets_for_given_companies_for_given_date(COMPANIES_SET, END_DATE)
+    weights_today = get_weights_for_bets_for_given_companies_for_given_date(COMPANIES_SET, END_DATE, NUMBER_OF_REPORTS_TAKEN_FOR_CALCULATION_ARRAY[0])
     weights_today = sorted(weights_today, key=lambda x: x[1], reverse=True)
     for item in weights_today: print(item)
 
@@ -22,8 +22,8 @@ def run_profiler():
 
 # FUNCTIONALITY (uncomment to run):
 # find_out_value_per_dollar_spent_today_for_given_companies()
-run_multiple_simulations(COMPANIES_SET, START_DATE, END_DATE, SUB_PERIOD_LENGTH_IN_DAYS_ARRAY, NUMBER_OF_REPORTS_TAKEN_FOR_CALCULATION_ARRAY)
+# run_multiple_simulations(COMPANIES_SET, START_DATE, END_DATE, SUB_PERIOD_LENGTH_IN_DAYS_ARRAY, NUMBER_OF_REPORTS_TAKEN_FOR_CALCULATION_ARRAY)
 # run_unit_tests()
 # read_all_data_from_database()
 # run_profiler()
-# calculate_average_market_value_per_dollar(COMPANIES_SET, START_DATE, END_DATE, SUB_PERIOD_LENGTH_IN_DAYS_ARRAY[0], NUMBER_OF_REPORTS_TAKEN_FOR_CALCULATION_ARRAY[0])
+calculate_average_market_value_per_dollar(COMPANIES_SET, START_DATE, END_DATE, SUB_PERIOD_LENGTH_IN_DAYS_ARRAY[0], NUMBER_OF_REPORTS_TAKEN_FOR_CALCULATION_ARRAY[0])
