@@ -8,6 +8,10 @@ SQL_QUERY_EXISTING_REPORTS = "SELECT * FROM cash_flow_statement WHERE company_na
 SQL_QUERY_EXISTING_SHARES_AMOUNT = "SELECT shares_amount FROM SHARES_AMOUNT WHERE company_ticker = ? AND date = ?"
 SQL_QUERY_EXISTING_SHARE_PRICE = "SELECT share_price FROM SHARE_PRICE WHERE company_ticker = ? AND date = ?"
 SQL_QUERY_EXISTING_SHARE_PRICES_IN_PERIOD = "SELECT data FROM SHARE_PRICES_IN_PERIOD WHERE company_ticker = ? AND start_date = ? AND end_date = ?"
+SQL_QUERY_INSERT_FINANCIAL_REPORT = 'INSERT OR REPLACE INTO cash_flow_statement VALUES (?, ?, ?)'
+SQL_QUERY_INSERT_SHARES_AMOUNT = 'INSERT OR REPLACE INTO SHARES_AMOUNT VALUES (?, ?, ?)'
+SQL_QUERY_INSERT_SHARE_PRICE = 'INSERT OR REPLACE INTO SHARE_PRICE VALUES (?, ?, ?)'
+SQL_QUERY_INSERT_SHARE_PRICE_PERIOD = 'INSERT OR REPLACE INTO SHARE_PRICES_IN_PERIOD VALUES (?, ?, ?, ?)'
 SQL_QUERY_MOST_RECENT_FINANCIAL_REPORTS = 'SELECT * FROM cash_flow_statement WHERE company_name = ? AND date <= ? ORDER BY date DESC LIMIT ?'
 SQL_READING_ALL_QUERIES = {
     'SELECT * FROM cash_flow_statement',
@@ -21,20 +25,16 @@ def _initialize_database(sql_query):
     with sl.connect(DATABASE_PATH) as con: con.execute(sql_query)
 
 def save_financial_data(financial_data, ticker):
-    insert_query = 'INSERT OR REPLACE INTO cash_flow_statement VALUES (?, ?, ?)'
-    for report in financial_data['results']:
-        cash_flow_statement = report.get('financials', {}).get('cash_flow_statement', {})
-        date = report['filing_date'] if 'filing_date' in report else report['end_date']
-        value = cash_flow_statement['net_cash_flow']['value'] if 'net_cash_flow' in cash_flow_statement and 'value' in cash_flow_statement['net_cash_flow'] else None
-        _save_data_to_database(SQL_QUERY_CREATE_TABLE_CASH_FLOW_STATEMENT, insert_query, value, ticker, date)
+    for report in financial_data:
+        date = report['filing_date'] if 'filing_date' in report else report['date']
+        value = report['freeCashFlow']
+        _save_data_to_database(SQL_QUERY_CREATE_TABLE_CASH_FLOW_STATEMENT, SQL_QUERY_INSERT_FINANCIAL_REPORT, value, ticker, date)
 
 def save_shares_amount_data(value, company, date):
-    insert_query = 'INSERT OR REPLACE INTO SHARES_AMOUNT VALUES (?, ?, ?)'
-    _save_data_to_database(SQL_QUERY_CREATE_TABLE_SHARES_AMOUNT, insert_query, int(value), company, date)
+    _save_data_to_database(SQL_QUERY_CREATE_TABLE_SHARES_AMOUNT, SQL_QUERY_INSERT_SHARES_AMOUNT, int(value), company, date)
 
 def save_share_price_daily_data(value, company, date):
-    insert_query = 'INSERT OR REPLACE INTO SHARE_PRICE VALUES (?, ?, ?)'
-    _save_data_to_database(SQL_QUERY_CREATE_TABLE_SHARE_PRICE, insert_query, float(value), company, date)
+    _save_data_to_database(SQL_QUERY_CREATE_TABLE_SHARE_PRICE, SQL_QUERY_INSERT_SHARE_PRICE, float(value), company, date)
 
 def _save_data_to_database(init_query, insert_query, value, company, date):
     _initialize_database(init_query)
@@ -45,7 +45,7 @@ def _save_data_to_database(init_query, insert_query, value, company, date):
 def save_share_prices_in_period_data(company, start_date, end_date, data):
     _initialize_database(SQL_QUERY_CREATE_TABLE_SHARE_PRICES_IN_PERIOD)
     with sl.connect(DATABASE_PATH) as con:
-        try: con.execute('INSERT OR REPLACE INTO SHARE_PRICES_IN_PERIOD VALUES (?, ?, ?, ?)', (company, start_date, end_date, data))
+        try: con.execute(SQL_QUERY_INSERT_SHARE_PRICE_PERIOD, (company, start_date, end_date, data))
         except Exception as e: print(f"Error in save_share_price_daily_data: {e}")
 
 def get_stored_financial_reports_if_available(number_of_reports_for_calculations, number_of_reports_to_fetch, company_ticker, date):
@@ -53,7 +53,8 @@ def get_stored_financial_reports_if_available(number_of_reports_for_calculations
         are_reports_stored = False
         try:
             existing_reports = con.execute(SQL_QUERY_EXISTING_REPORTS, (company_ticker,)).fetchall()
-            are_reports_stored = len(existing_reports) >= number_of_reports_to_fetch
+            # are_reports_stored = len(existing_reports) >= number_of_reports_to_fetch
+            are_reports_stored = len(existing_reports) > 0
         except Exception as e: return None
         if are_reports_stored:
             try:
@@ -82,8 +83,7 @@ def get_stored_share_prices_in_period_if_available(company, start_date, end_date
     with sl.connect(DATABASE_PATH) as con:
         try: stored_value = con.execute(SQL_QUERY_EXISTING_SHARE_PRICES_IN_PERIOD, (company, start_date, end_date)).fetchall()
         except Exception as e: return None
-        if stored_value != None and len(stored_value)>0 and len(stored_value[0])>0:
-            return stored_value[0][0]
+        if stored_value != None and len(stored_value)>0 and len(stored_value[0])>0: return stored_value[0][0]
         else: return None
 
 def read_all_data_from_database():
@@ -91,7 +91,7 @@ def read_all_data_from_database():
         acc = 0
         with sl.connect(DATABASE_PATH) as con:
             cursor = con.execute(query)
-            # print([description[0] for description in cursor.description]) # Headers
+            print([description[0] for description in cursor.description]) # Headers
             for row in cursor:
                 # print(row)
                 acc += 1

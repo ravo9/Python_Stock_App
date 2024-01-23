@@ -19,13 +19,12 @@ def _run_simulation(companies, start_date, end_date, period_length_in_days, numb
     change_in_value_of_money_invested_by_using_tested_strategy = _perform_simulation_logic(companies, start_date, end_date, period_length_in_days, number_of_reports_for_calculation)
     _present_simulation_results(change_in_value_of_money_invested_equally, change_in_value_of_money_invested_by_using_tested_strategy)
 
-def _perform_simulation_logic(companies, start_date, end_date, period_length_in_days, number_of_reports_for_calculation):
+def _perform_simulation_logic(companies, start_date, end_date, period_length_in_days, number_of_reports_for_calculation, original_money = 1000):
     sub_period_dates = split_whole_period_into_chunks(start_date, end_date, period_length_in_days)
-    original_money = 1000
     money = original_money
     acc = 1
     for sub_period_start_date, sub_period_end_date in sub_period_dates:
-        print(f"{(acc / len(sub_period_dates) * 100):.2f}%", end='\r')
+        _display_progress(acc, len(sub_period_dates))
         acc += 1
         sub_period_weights = get_weights_for_bets_for_given_companies_for_given_date(companies, sub_period_start_date, number_of_reports_for_calculation)
         investment_change = calculate_investment_value_change(sub_period_weights, (sub_period_end_date == end_date), sub_period_start_date, sub_period_end_date)
@@ -37,7 +36,7 @@ def calculate_average_market_value_per_dollar(companies, start_date, end_date, p
     average_value_per_dollar_spent_across_sub_periods = 0.0
     acc = 1
     for sub_period_start_date, sub_period_end_date in sub_period_dates:
-        print(f"{(acc / len(sub_period_dates) * 100):.2f}%", end='\r')
+        _display_progress(acc, len(sub_period_dates))
         acc += 1
         sub_period_weights = get_weights_for_bets_for_given_companies_for_given_date(companies, sub_period_start_date, number_of_reports_for_calculation)
         average_value = average_real_value_per_dollar(sub_period_weights, sub_period_start_date)
@@ -48,6 +47,9 @@ def calculate_average_market_value_per_dollar(companies, start_date, end_date, p
 def average_real_value_per_dollar(real_values, date):
     if not real_values: return None
     return sum(value for _, value in real_values) / len(real_values)
+
+def _display_progress(acc, total_length):
+    print(f"{((acc/total_length) * 100):.2f}%", end='\r')
 
 def _present_simulation_results(money_invested_equally, money_invested_according_to_strategy):
     print("MONEY INVESTED IN GIVEN COMPANIES EQUALLY (AVERAGE): " + "{0:.2%}".format(money_invested_equally))
