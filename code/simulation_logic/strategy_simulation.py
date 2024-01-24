@@ -26,7 +26,8 @@ def _perform_simulation_logic(companies, start_date, end_date, period_length_in_
         _display_progress(acc, len(sub_period_dates))
         acc += 1
         sub_period_weights = calculate_weights(companies, sub_period_start_date, number_of_reports_for_calculation)
-        # sub_period_weights = modify_weights(sub_period_weights, start_date, sub_period_end_date, period_length_in_days, number_of_reports_for_calculation)
+        # if acc != 2:
+        #     sub_period_weights = modify_weights(sub_period_weights, start_date, sub_period_end_date, period_length_in_days, number_of_reports_for_calculation)
         investment_change = calculate_investment_value_change(sub_period_weights, sub_period_start_date, sub_period_end_date)
         money *= (1 + investment_change)
     return (money - original_money)/ original_money
@@ -34,10 +35,17 @@ def _perform_simulation_logic(companies, start_date, end_date, period_length_in_
 def modify_weights(sub_period_weights, start_date, end_date, period_length_in_days, number_of_reports_for_calculation):
     modified_weights = []
     for ticker, weight in sub_period_weights:
-        average_value_this_company_is_traded_per_one_dollar = calculate_average_market_value_per_dollar([ticker], start_date, sub_period_end_date, period_length_in_days, number_of_reports_for_calculation)
-        modified_weight = weight / average_value_this_company_is_traded_per_one_dollar - 1
+        average_value_this_company_is_traded_per_one_dollar = calculate_average_market_value_per_dollar([ticker], start_date, end_date, period_length_in_days, number_of_reports_for_calculation)
+        # print("FLAG 1")
+        # print(average_value_this_company_is_traded_per_one_dollar)
+        modified_weight = float(weight)/float(average_value_this_company_is_traded_per_one_dollar)
+        # print("FLAG 2")
+        # print(weight)
+        modified_weight -= float(1)
+        # print("FLAG 3")
+        # print(modified_weight)
         modified_weights.append((ticker, float(modified_weight)))
-    return modify_weights
+    return modified_weights
 
 def calculate_average_market_value_per_dollar(companies, start_date, end_date, period_length_in_days, number_of_reports_for_calculation):
     sub_period_dates = split_whole_period_into_chunks(start_date, end_date, period_length_in_days)

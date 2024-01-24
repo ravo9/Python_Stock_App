@@ -25,16 +25,11 @@ def calculate_investment_value_change(companies_tickers_with_weights, start_date
     for ticker, company_bet_weight in companies_tickers_with_weights:
         share_prices_table = retrieve_share_prices_per_period(ticker, start_date, end_date)
         first_day_price, last_day_price = share_prices_table[0][0], share_prices_table[0][-1]
-
-        if sum_of_all_bets == 0.0:
-            change_in_invested_money = 0
-        else:
-            change_in_invested_money += calculate_change_in_share_price(first_day_price, last_day_price) * company_bet_weight / sum_of_all_bets
+        change_in_invested_money += calculate_change_in_share_price(first_day_price, last_day_price) * company_bet_weight / sum_of_all_bets
     return change_in_invested_money
 
 def calculate_weights(companies, date, number_of_reports_for_calculation, ATTRIBUTE_OF_DECISION_INDEX = 2):
     calculated_weights = []
-    sum_of_weights = 0.0
     for ticker in companies:
         financial_reports = retrieve_financial_reports(number_of_reports_for_calculation, NUMBER_OF_REPORTS_TO_FETCH_FROM_API, ticker, date)
         all_shares_amount  = retrieve_total_amount_of_shares_on_particular_day(ticker, date)
