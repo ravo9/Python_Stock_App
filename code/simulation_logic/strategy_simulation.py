@@ -27,7 +27,7 @@ def _perform_simulation_logic(companies, start_date, end_date, period_length_in_
         _display_progress(acc, len(sub_period_dates))
         acc += 1
         sub_period_weights = get_weights_for_bets_for_given_companies_for_given_date(companies, sub_period_start_date, number_of_reports_for_calculation)
-        investment_change = calculate_investment_value_change(sub_period_weights, (sub_period_end_date == end_date), sub_period_start_date, sub_period_end_date)
+        investment_change = calculate_investment_value_change(sub_period_weights, sub_period_start_date, sub_period_end_date)
         money *= (1 + investment_change)
     return (money - original_money)/ original_money
 
@@ -44,8 +44,7 @@ def calculate_average_market_value_per_dollar(companies, start_date, end_date, p
         average_value_per_dollar_spent_across_sub_periods += average_value
     print("AVERAGE VALUE PER DOLLAR SPENT ACROSS WHOLE PERIOD: " + str(average_value_per_dollar_spent_across_sub_periods/len(sub_period_dates)))
 
-def average_real_value_per_dollar(real_values, date):
-    return sum(value for _, value in real_values) / len(real_values) if real_values else None
+def average_real_value_per_dollar(real_values, date): return sum(value for _, value in real_values) / len(real_values) if real_values else None
 
 def _display_progress(acc, total_length): print(f"{((acc/total_length) * 100):.2f}%", end='\r')
 

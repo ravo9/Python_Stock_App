@@ -40,6 +40,7 @@ def get_stored_financial_reports_if_available(number_of_reports_for_calculations
             try:
                 reports = con.execute(SQL_QUERY_MOST_RECENT_FINANCIAL_REPORTS, (ticker, date, number_of_reports_for_calculations)).fetchall()
                 if not reports: raise ValueError("ERROR: Empty list")
+                # print("RETRIEVED REPORTS FOR " + ticker + " : " + str(len(reports)))
                 return reports
             except Exception as e: print(f"Error get_stored_financial_reports_if_available: Request failed: {ticker} - {e}")
         return None
