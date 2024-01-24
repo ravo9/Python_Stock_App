@@ -24,7 +24,11 @@ def calculate_investment_value_change(companies_tickers_with_weights, start_date
     for ticker, company_bet_weight in companies_tickers_with_weights:
         share_prices_table = retrieve_share_prices_per_period(ticker, start_date, end_date)
         first_day_price, last_day_price = share_prices_table[0][0], share_prices_table[0][-1]
-        change_in_invested_money += calculate_change_in_share_price(first_day_price, last_day_price) * company_bet_weight / sum_of_all_bets
+
+        if sum_of_all_bets == 0.0:
+            change_in_invested_money = 0
+        else:
+            change_in_invested_money += calculate_change_in_share_price(first_day_price, last_day_price) * company_bet_weight / sum_of_all_bets
     return change_in_invested_money
 
 # UNIT TESTING

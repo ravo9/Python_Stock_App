@@ -16,7 +16,7 @@ START_DATE = '2023-01-01'
 
 END_DATE = '2024-01-01'
 
-COMPANIES_SET = ['META']
+COMPANIES_SET = ['TSLA', 'META']
 # To investigate: single company is not giving the same result as average investment - in some cases (e.g. 90 days period)
 
 SUB_PERIOD_LENGTH_IN_DAYS_ARRAY = [100]

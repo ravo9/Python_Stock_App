@@ -5,7 +5,7 @@ parent_dir = os.path.dirname(current_dir)
 sys.path.insert(0, parent_dir)
 from simulation_logic.calculation_utils import calculate_investment_value_change, calculate_average_share_price_change_for_given_companies_in_given_period
 from date_utils import split_whole_period_into_chunks
-from simulation_logic.weights_factory import get_weights_for_bets_for_given_companies_for_given_date
+from simulation_logic.weights_factory import get_weights_for_bets
 
 def run_multiple_simulations(companies, start_date, end_date, SUB_PERIOD_LENGTH_IN_DAYS_ARRAY, NUMBER_OF_REPORTS_TAKEN_FOR_CALCULATION_ARRAY):
     for sub_period_length in SUB_PERIOD_LENGTH_IN_DAYS_ARRAY:
@@ -26,10 +26,19 @@ def _perform_simulation_logic(companies, start_date, end_date, period_length_in_
     for sub_period_start_date, sub_period_end_date in sub_period_dates:
         _display_progress(acc, len(sub_period_dates))
         acc += 1
-        sub_period_weights = get_weights_for_bets_for_given_companies_for_given_date(companies, sub_period_start_date, number_of_reports_for_calculation)
+        sub_period_weights = get_weights_for_bets(companies, sub_period_start_date, number_of_reports_for_calculation)
+        # sub_period_weights = modify_weights(sub_period_weights, start_date, sub_period_end_date, period_length_in_days, number_of_reports_for_calculation)
         investment_change = calculate_investment_value_change(sub_period_weights, sub_period_start_date, sub_period_end_date)
         money *= (1 + investment_change)
     return (money - original_money)/ original_money
+
+def modify_weights(sub_period_weights, start_date, end_date, period_length_in_days, number_of_reports_for_calculation):
+    modified_weights = []
+    for ticker, weight in sub_period_weights:
+        average_value_this_company_is_traded_per_one_dollar = calculate_average_market_value_per_dollar([ticker], start_date, sub_period_end_date, period_length_in_days, number_of_reports_for_calculation)
+        modified_weight = weight / average_value_this_company_is_traded_per_one_dollar - 1
+        modified_weights.append((ticker, float(modified_weight)))
+    return modify_weights
 
 def calculate_average_market_value_per_dollar(companies, start_date, end_date, period_length_in_days, number_of_reports_for_calculation):
     sub_period_dates = split_whole_period_into_chunks(start_date, end_date, period_length_in_days)
@@ -38,11 +47,12 @@ def calculate_average_market_value_per_dollar(companies, start_date, end_date, p
     for sub_period_start_date, sub_period_end_date in sub_period_dates:
         _display_progress(acc, len(sub_period_dates))
         acc += 1
-        sub_period_weights = get_weights_for_bets_for_given_companies_for_given_date(companies, sub_period_start_date, number_of_reports_for_calculation)
+        sub_period_weights = get_weights_for_bets(companies, sub_period_start_date, number_of_reports_for_calculation)
         average_value = average_real_value_per_dollar(sub_period_weights, sub_period_start_date)
-        if sub_period_weights: print(f"Average value per dollar spent for given companies on {sub_period_start_date} : {average_value}")
+        # if sub_period_weights: print(f"Average value per dollar spent for given companies on {sub_period_start_date} : {average_value}")
         average_value_per_dollar_spent_across_sub_periods += average_value
-    print("AVERAGE VALUE PER DOLLAR SPENT ACROSS WHOLE PERIOD: " + str(average_value_per_dollar_spent_across_sub_periods/len(sub_period_dates)))
+    return average_value_per_dollar_spent_across_sub_periods/len(sub_period_dates)
+    # print("AVERAGE VALUE PER DOLLAR SPENT ACROSS WHOLE PERIOD: " + str(average_value_per_dollar_spent_across_sub_periods/len(sub_period_dates)))
 
 def average_real_value_per_dollar(real_values, date): return sum(value for _, value in real_values) / len(real_values) if real_values else None
 

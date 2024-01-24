@@ -6,7 +6,7 @@ sys.path.insert(0, parent_dir)
 from data_repository import retrieve_share_price_daily, retrieve_total_amount_of_shares_on_particular_day, retrieve_financial_reports
 from config import NUMBER_OF_REPORTS_TO_FETCH_FROM_API
 
-def get_weights_for_bets_for_given_companies_for_given_date(companies, date, number_of_reports_for_calculation, ATTRIBUTE_OF_DECISION_INDEX = 2):
+def get_weights_for_bets(companies, date, number_of_reports_for_calculation, ATTRIBUTE_OF_DECISION_INDEX = 2):
     calculated_weights = []
     sum_of_weights = 0.0
     for ticker in companies:
