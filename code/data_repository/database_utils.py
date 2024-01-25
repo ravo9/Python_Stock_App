@@ -41,16 +41,8 @@ def save_data_to_database(init_query, insert_query, *params):
         except Exception as e: print(f"Error in save_data_to_database: {e}")
 
 def get_stored_financial_statements_if_available(statement_type, number_of_reports_for_calculations, number_of_reports_to_fetch, ticker, date):
-    sql_existing_statements = {
-        'cash_flow_statement': SQL_EXISTING_CASH_FLOW_STATEMENTS,
-        'income_statement': SQL_EXISTING_INCOME_STATEMENTS,
-        'balance_sheet': SQL_EXISTING_BALANCE_SHEETS
-    }
-    sql_recent_statements = {
-        'cash_flow_statement': SQL_MOST_RECENT_CASH_FLOW_STATEMENTS,
-        'income_statement': SQL_MOST_RECENT_INCOME_STATEMENTS,
-        'balance_sheet': SQL_MOST_RECENT_BALANCE_SHEETS
-    }
+    sql_existing_statements = {'cash_flow_statement': SQL_EXISTING_CASH_FLOW_STATEMENTS, 'income_statement': SQL_EXISTING_INCOME_STATEMENTS, 'balance_sheet': SQL_EXISTING_BALANCE_SHEETS}
+    sql_recent_statements = {'cash_flow_statement': SQL_MOST_RECENT_CASH_FLOW_STATEMENTS,'income_statement': SQL_MOST_RECENT_INCOME_STATEMENTS, 'balance_sheet': SQL_MOST_RECENT_BALANCE_SHEETS}
     with sl.connect(DATABASE_PATH) as con:
         are_reports_stored = False
         try: are_reports_stored = len(con.execute(sql_existing_statements[statement_type], (ticker,)).fetchall()) > 0

@@ -1,5 +1,5 @@
 from data_repository.database_utils import get_stored_value_if_available, get_stored_financial_statements_if_available, SQL_EXISTING_SHARE_PRICE, SQL_EXISTING_SHARES_AMOUNT, SQL_EXISTING_SHARE_PRICES_IN_PERIOD
-from data_repository.api_utils import fetch_share_price_daily, fetch_share_prices_per_period, fetch_total_amount_of_shares_on_particular_day, fetch_cash_flow_statements, fetch_income_statements, fetch_balance_sheets
+from data_repository.api_utils import fetch_share_price_daily, fetch_share_prices_per_period, fetch_total_amount_of_shares_on_particular_day, fetch_financial_statements
 from datetime import datetime, timedelta
 import json
 import unittest
@@ -8,11 +8,8 @@ from unittest.mock import Mock, patch
 DATE_FORMAT = "%Y-%m-%d"
 
 def retrieve_financial_statements(statement_type, number_of_reports_for_calculations, number_of_reports_to_fetch, ticker, date):
-    if statement_type == 'cash_flow_statement': fetch_function = fetch_cash_flow_statements
-    elif statement_type == 'income_statement': fetch_function = fetch_income_statements
-    elif statement_type == 'balance_sheet': fetch_function = fetch_balance_sheets
     stored_value = get_stored_financial_statements_if_available(statement_type, number_of_reports_for_calculations, number_of_reports_to_fetch, ticker, date)
-    return stored_value if stored_value is not None else fetch_function(ticker, number_of_reports_for_calculations, number_of_reports_to_fetch, date)
+    return stored_value if stored_value is not None else fetch_financial_statements(statement_type, ticker, number_of_reports_for_calculations, number_of_reports_to_fetch, date)
 
 def retrieve_share_price_daily(company, date, date_format = DATE_FORMAT):
     stored_value = get_stored_value_if_available(SQL_EXISTING_SHARE_PRICE, company, date) # Caching

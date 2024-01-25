@@ -11,35 +11,17 @@ API_ENDPOINT_INCOME_STATEMENTS = "https://financialmodelingprep.com/api/v3/incom
 API_ENDPOINT_BALANCE_SHEETS = "https://financialmodelingprep.com/api/v3/balance-sheet-statement/"
 API_KEY = "ee22bac37cfc64407760039b37d56065"
 
-def fetch_cash_flow_statements(ticker, number_of_reports_for_calculations, number_of_reports_to_fetch, date):
+def fetch_financial_statements(statement_type, ticker, number_of_reports_for_calculations, number_of_reports_to_fetch, date):
+    api_endpoints = {'cash_flow_statement': API_ENDPOINT_CASH_FLOW_STATEMENTS, 'income_statement': API_ENDPOINT_INCOME_STATEMENTS, 'balance_sheet': API_ENDPOINT_BALANCE_SHEETS}
     try:
-        print("DOWNLOADING CASH FLOW STATEMENTS FOR: " + ticker)
-        response = requests.get((API_ENDPOINT_CASH_FLOW_STATEMENTS + ticker), params={"apikey": API_KEY, "period": "quarterly"})
-        save_financial_statements_data("cash_flow_statement", response.json(), ticker) if response.ok else print(f"Error fetching data: {ticker}: {response.status_code} - {response.reason}")
-        recent_reports = get_stored_financial_statements_raw("cash_flow_statement", ticker, date, number_of_reports_for_calculations)
+        print(f"DOWNLOADING {statement_type.replace('_', ' ').upper()} FOR: {ticker}")
+        response = requests.get((api_endpoints[statement_type] + ticker), params={"apikey": API_KEY, "period": "quarterly"})
+        if response.ok: save_financial_statements_data(statement_type, response.json(), ticker)
+        else: print(f"Error fetching data: {ticker}: {response.status_code} - {response.reason}")
+        recent_reports = get_stored_financial_statements_raw(statement_type, ticker, date, number_of_reports_for_calculations)
         if not recent_reports: raise ValueError("ERROR: Empty list")
         return recent_reports
-    except Exception as e: print(f"Error fetch_cash_flow_statements: Request failed: {ticker} - {e}")
-
-def fetch_income_statements(ticker, number_of_reports_for_calculations, number_of_reports_to_fetch, date):
-    try:
-        print("DOWNLOADING INCOME STATEMENTS FOR: " + ticker)
-        response = requests.get((API_ENDPOINT_INCOME_STATEMENTS + ticker), params={"apikey": API_KEY, "period": "quarterly"})
-        save_financial_statements_data("income_statement", response.json(), ticker) if response.ok else print(f"Error fetching data: {ticker}: {response.status_code} - {response.reason}")
-        recent_reports = get_stored_financial_statements_raw("income_statement", ticker, date, number_of_reports_for_calculations)
-        if not recent_reports: raise ValueError("ERROR: Empty list")
-        return recent_reports
-    except Exception as e: print(f"Error fetch_income_statements: Request failed: {ticker} - {e}")
-
-def fetch_balance_sheets(ticker, number_of_reports_for_calculations, number_of_reports_to_fetch, date):
-    try:
-        print("DOWNLOADING BALANCE SHEETS FOR: " + ticker)
-        response = requests.get((API_ENDPOINT_BALANCE_SHEETS + ticker), params={"apikey": API_KEY, "period": "quarterly"})
-        save_financial_statements_data("balance_sheet", response.json(), ticker) if response.ok else print(f"Error fetching data: {ticker}: {response.status_code} - {response.reason}")
-        recent_reports = get_stored_financial_statements_raw("balance_sheet", ticker, date, number_of_reports_for_calculations)
-        if not recent_reports: raise ValueError("ERROR: Empty list")
-        return recent_reports
-    except Exception as e: print(f"Error fetch_balance_sheets: Request failed: {ticker} - {e}")
+    except Exception as e: print(f"Error fetch_financial_statements {statement_type} : Request failed: {ticker} - {e}")
 
 def fetch_share_price_daily(company, date, date_format = "%Y-%m-%d"):
     for _ in range(5):
