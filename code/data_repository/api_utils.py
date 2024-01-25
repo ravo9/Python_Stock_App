@@ -1,23 +1,45 @@
 import yfinance as yf
 from datetime import datetime, timedelta
-from data_repository.database_utils import save_financial_data, save_data_to_database, get_stored_reports_raw, SQL_QUERY_CREATE_TABLE_SHARE_PRICE, SQL_QUERY_INSERT_SHARE_PRICE, SQL_QUERY_CREATE_TABLE_SHARES_AMOUNT, SQL_QUERY_INSERT_SHARES_AMOUNT, SQL_QUERY_CREATE_TABLE_SHARE_PRICES_IN_PERIOD, SQL_QUERY_INSERT_SHARE_PRICE_PERIOD
+from data_repository.database_utils import save_cash_flow_statements_data, save_income_statements_data, save_balance_sheets_data, save_data_to_database, get_stored_cash_flow_statements_raw, get_stored_income_statements_raw, get_stored_balance_sheets_raw, SQL_QUERY_CREATE_TABLE_SHARE_PRICE, SQL_QUERY_INSERT_SHARE_PRICE, SQL_QUERY_CREATE_TABLE_SHARES_AMOUNT, SQL_QUERY_INSERT_SHARES_AMOUNT, SQL_QUERY_CREATE_TABLE_SHARE_PRICES_IN_PERIOD, SQL_QUERY_INSERT_SHARE_PRICE_PERIOD
 import contextlib
 import requests
 import os
 import json
 
-API_ENDPOINT = "https://financialmodelingprep.com/api/v3/cash-flow-statement/"
+API_ENDPOINT_CASH_FLOW_STATEMENTS = "https://financialmodelingprep.com/api/v3/cash-flow-statement/"
+API_ENDPOINT_INCOME_STATEMENTS = "https://financialmodelingprep.com/api/v3/income-statement/"
+API_ENDPOINT_BALANCE_SHEETS = "https://financialmodelingprep.com/api/v3/balance-sheet-statement/"
 API_KEY = "ee22bac37cfc64407760039b37d56065"
 
-def fetch_financial_reports(ticker, number_of_reports_for_calculations, number_of_reports_to_fetch, date):
+def fetch_cash_flow_statements(ticker, number_of_reports_for_calculations, number_of_reports_to_fetch, date):
     try:
-        print("DOWNLOADING: " + ticker)
-        response = requests.get((API_ENDPOINT + ticker), params={"apikey": API_KEY, "period": "quarterly"})
-        save_financial_data(response.json(), ticker) if response.ok else print(f"Error fetching data: {ticker}: {response.status_code} - {response.reason}")
-        recent_reports = get_stored_reports_raw(ticker, date, number_of_reports_for_calculations)
+        print("DOWNLOADING CASH FLOW STATEMENTS FOR: " + ticker)
+        response = requests.get((API_ENDPOINT_CASH_FLOW_STATEMENTS + ticker), params={"apikey": API_KEY, "period": "quarterly"})
+        save_cash_flow_statements_data(response.json(), ticker) if response.ok else print(f"Error fetching data: {ticker}: {response.status_code} - {response.reason}")
+        recent_reports = get_stored_cash_flow_statements_raw(ticker, date, number_of_reports_for_calculations)
         if not recent_reports: raise ValueError("ERROR: Empty list")
         return recent_reports
-    except Exception as e: print(f"Error fetch_financial_reports: Request failed: {ticker} - {e}")
+    except Exception as e: print(f"Error fetch_cash_flow_statements: Request failed: {ticker} - {e}")
+
+def fetch_income_statements(ticker, number_of_reports_for_calculations, number_of_reports_to_fetch, date):
+    try:
+        print("DOWNLOADING INCOME STATEMENTS FOR: " + ticker)
+        response = requests.get((API_ENDPOINT_INCOME_STATEMENTS + ticker), params={"apikey": API_KEY, "period": "quarterly"})
+        save_income_statements_data(response.json(), ticker) if response.ok else print(f"Error fetching data: {ticker}: {response.status_code} - {response.reason}")
+        recent_reports = get_stored_income_statements_raw(ticker, date, number_of_reports_for_calculations)
+        if not recent_reports: raise ValueError("ERROR: Empty list")
+        return recent_reports
+    except Exception as e: print(f"Error fetch_income_statements: Request failed: {ticker} - {e}")
+
+def fetch_balance_sheets(ticker, number_of_reports_for_calculations, number_of_reports_to_fetch, date):
+    try:
+        print("DOWNLOADING BALANCE SHEETS FOR: " + ticker)
+        response = requests.get((API_ENDPOINT_BALANCE_SHEETS + ticker), params={"apikey": API_KEY, "period": "quarterly"})
+        save_balance_sheets_data(response.json(), ticker) if response.ok else print(f"Error fetching data: {ticker}: {response.status_code} - {response.reason}")
+        recent_reports = get_stored_balance_sheets_raw(ticker, date, number_of_reports_for_calculations)
+        if not recent_reports: raise ValueError("ERROR: Empty list")
+        return recent_reports
+    except Exception as e: print(f"Error fetch_balance_sheets: Request failed: {ticker} - {e}")
 
 def fetch_share_price_daily(company, date, date_format = "%Y-%m-%d"):
     for _ in range(5):

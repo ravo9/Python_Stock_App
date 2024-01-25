@@ -1,5 +1,5 @@
-from data_repository.database_utils import get_stored_value_if_available, get_stored_value_if_available, get_stored_financial_reports_if_available, SQL_QUERY_EXISTING_SHARE_PRICE, SQL_QUERY_EXISTING_SHARES_AMOUNT, SQL_QUERY_EXISTING_SHARE_PRICES_IN_PERIOD
-from data_repository.api_utils import fetch_share_price_daily, fetch_share_prices_per_period, fetch_total_amount_of_shares_on_particular_day, fetch_financial_reports
+from data_repository.database_utils import get_stored_value_if_available, get_stored_cash_flow_statements_if_available, get_stored_income_statements_if_available, get_stored_balance_sheets_if_available, SQL_QUERY_EXISTING_SHARE_PRICE, SQL_QUERY_EXISTING_SHARES_AMOUNT, SQL_QUERY_EXISTING_SHARE_PRICES_IN_PERIOD
+from data_repository.api_utils import fetch_share_price_daily, fetch_share_prices_per_period, fetch_total_amount_of_shares_on_particular_day, fetch_cash_flow_statements, fetch_income_statements, fetch_balance_sheets
 from datetime import datetime, timedelta
 import json
 import unittest
@@ -7,10 +7,20 @@ from unittest.mock import Mock, patch
 
 DATE_FORMAT = "%Y-%m-%d"
 
-def retrieve_financial_reports(number_of_reports_for_calculations, number_of_reports_to_fetch, ticker, date):
-    stored_value = get_stored_financial_reports_if_available(number_of_reports_for_calculations, number_of_reports_to_fetch, ticker, date)
+def retrieve_cash_flow_statements(number_of_reports_for_calculations, number_of_reports_to_fetch, ticker, date):
+    stored_value = get_stored_cash_flow_statements_if_available(number_of_reports_for_calculations, number_of_reports_to_fetch, ticker, date)
     if stored_value != None: return stored_value
-    return fetch_financial_reports(ticker, number_of_reports_for_calculations, number_of_reports_to_fetch, date)
+    return fetch_cash_flow_statements(ticker, number_of_reports_for_calculations, number_of_reports_to_fetch, date)
+
+def retrieve_income_statements(number_of_reports_for_calculations, number_of_reports_to_fetch, ticker, date):
+    stored_value = get_stored_income_statements_if_available(number_of_reports_for_calculations, number_of_reports_to_fetch, ticker, date)
+    if stored_value != None: return stored_value
+    return fetch_income_statements(ticker, number_of_reports_for_calculations, number_of_reports_to_fetch, date)
+
+def retrieve_balance_sheets(number_of_reports_for_calculations, number_of_reports_to_fetch, ticker, date):
+    stored_value = get_stored_balance_sheets_if_available(number_of_reports_for_calculations, number_of_reports_to_fetch, ticker, date)
+    if stored_value != None: return stored_value
+    return fetch_balance_sheets(ticker, number_of_reports_for_calculations, number_of_reports_to_fetch, date)
 
 def retrieve_share_price_daily(company, date, date_format = DATE_FORMAT):
     stored_value = get_stored_value_if_available(SQL_QUERY_EXISTING_SHARE_PRICE, company, date) # Caching
@@ -35,8 +45,8 @@ def retrieve_total_amount_of_shares_on_particular_day(company, date_str):
 
 class TestRetrieveFinancialReports(unittest.TestCase):
 
-    @patch('data_repository.database_utils.get_stored_financial_reports_if_available')
-    @patch('data_repository.api_utils.fetch_financial_reports')
+    @patch('data_repository.database_utils.get_stored_cash_flow_statements_if_available')
+    @patch('data_repository.api_utils.fetch_cash_flow_statements')
     def test_retrieve_from_fetch(self, mock_fetch, mock_get_stored):
         # Setup
         test_ticker = ['AAPL', 'TSLA']
@@ -48,7 +58,7 @@ class TestRetrieveFinancialReports(unittest.TestCase):
         # Execute
         results = []
         for ticker in test_ticker:
-            results += retrieve_financial_reports(test_number_of_reports_for_calculations, test_number_of_reports_to_fetch, ticker, test_date)
+            results += retrieve_cash_flow_statements(test_number_of_reports_for_calculations, test_number_of_reports_to_fetch, ticker, test_date)
         # Verify
         self.assertEqual(len(results), 16)
 

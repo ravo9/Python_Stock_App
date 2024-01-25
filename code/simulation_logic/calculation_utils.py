@@ -5,8 +5,10 @@ from unittest.mock import patch
 current_dir = os.path.dirname(os.path.abspath(__file__))
 parent_dir = os.path.dirname(current_dir)
 sys.path.insert(0, parent_dir)
-from data_repository.data_repository import retrieve_share_price_daily, retrieve_share_prices_per_period, retrieve_total_amount_of_shares_on_particular_day, retrieve_financial_reports
+from data_repository.data_repository import retrieve_share_price_daily, retrieve_share_prices_per_period, retrieve_total_amount_of_shares_on_particular_day, retrieve_cash_flow_statements, retrieve_income_statements, retrieve_balance_sheets
 from config import NUMBER_OF_REPORTS_TO_FETCH_FROM_API
+
+ATTRIBUTE_OF_DECISION_INDEX = 2
 
 calculate_change_in_share_price = lambda first_day_price, last_day_price: (last_day_price - first_day_price)/first_day_price
 
@@ -28,13 +30,19 @@ def calculate_investment_value_change(companies_tickers_with_weights, start_date
         change_in_invested_money += calculate_change_in_share_price(first_day_price, last_day_price) * company_bet_weight / sum_of_all_bets
     return change_in_invested_money
 
-def calculate_weights(companies, date, number_of_reports_for_calculation, ATTRIBUTE_OF_DECISION_INDEX = 2):
+def calculate_weights(companies, date, number_of_reports_for_calculation):
     calculated_weights = []
     for ticker in companies:
-        financial_reports = retrieve_financial_reports(number_of_reports_for_calculation, NUMBER_OF_REPORTS_TO_FETCH_FROM_API, ticker, date)
+        cash_flow_statements = retrieve_cash_flow_statements(number_of_reports_for_calculation, NUMBER_OF_REPORTS_TO_FETCH_FROM_API, ticker, date)
+        income_statements = retrieve_income_statements(number_of_reports_for_calculation, NUMBER_OF_REPORTS_TO_FETCH_FROM_API, ticker, date)
+        balance_sheets = retrieve_balance_sheets(number_of_reports_for_calculation, NUMBER_OF_REPORTS_TO_FETCH_FROM_API, ticker, date)
+
         all_shares_amount  = retrieve_total_amount_of_shares_on_particular_day(ticker, date)
         share_price_for_this_date = retrieve_share_price_daily(ticker, date)
-        average_real_value_over_analysed_reports = sum(report[ATTRIBUTE_OF_DECISION_INDEX] for report in financial_reports) / len(financial_reports)
+
+        # average_real_value_over_analysed_reports = calculate_value_by_free_cash_flow(cash_flow_statements)
+        average_real_value_over_analysed_reports = calculate_intrinsic_value(cash_flow_statements, income_statements, balance_sheets, number_of_reports_for_calculation, 5)
+
         value_per_dollar_spent = average_real_value_over_analysed_reports / all_shares_amount / share_price_for_this_date
         calculated_weights.append((ticker, value_per_dollar_spent))
     return calculated_weights
@@ -42,6 +50,52 @@ def calculate_weights(companies, date, number_of_reports_for_calculation, ATTRIB
 def find_out_value_per_dollar_spent_today(companies, date, number_of_reports_in_calculations):
     for item in sorted(calculate_weights(companies, date, number_of_reports_in_calculations), key=lambda x: x[1], reverse=True):
         print(item)
+
+def calculate_value_by_free_cash_flow(cash_flow_statements): return sum(report[ATTRIBUTE_OF_DECISION_INDEX] for report in cash_flow_statements) / len(cash_flow_statements)
+
+# Experimental
+# currently not years, but quarters
+def calculate_intrinsic_value(cash_flow_statements, income_statements, balance_sheets, num_years, projection_years):
+    """
+    free_cash_flows: List of free cash flows for each year.
+    num_years: Number of years to consider for averaging the FCF.
+    growth_rate: Annual growth rate of FCF.
+    discount_rate: Discount rate to calculate present value.
+    projection_years: Number of years to project FCF into the future.
+    """
+    free_cash_flows_only = [row[ATTRIBUTE_OF_DECISION_INDEX] for row in cash_flow_statements]
+    if len(free_cash_flows_only) < num_years: return "Insufficient data"
+    average_fcf = sum(free_cash_flows_only[-num_years:]) / num_years
+
+    growth_rate = calculate_growth_rate(free_cash_flows_only)
+    discount_rate = calculate_discount_rate(income_statements, balance_sheets, num_years)
+
+    present_value_fcf = 0
+    for year in range(1, projection_years + 1):
+        future_fcf = average_fcf * (1 + growth_rate) ** year
+        discounted_fcf = future_fcf / (1 + discount_rate) ** year
+        present_value_fcf += discounted_fcf
+    return float(present_value_fcf)
+
+def calculate_growth_rate(fcf_values):
+    if not fcf_values or len(fcf_values) == 0: print("No FCF data provided")
+    return sum(fcf_values) / len(fcf_values)
+
+def calculate_discount_rate(income_statements, balance_sheets, num_years):
+    # "Cost of debt" is interest_expense / total_debt - our simplified discount rate.
+    if not income_statements or len(income_statements) == 0: print("No Income Statements provided")
+    if not balance_sheets or len(balance_sheets) == 0: print("No Balance Sheets provided")
+
+    interest_expense_only = [row[ATTRIBUTE_OF_DECISION_INDEX] for row in income_statements]
+    if len(interest_expense_only) < num_years: return "Insufficient data"
+    average_interest_expense = sum(interest_expense_only[-num_years:]) / num_years
+
+    total_debt_only = [row[ATTRIBUTE_OF_DECISION_INDEX] for row in balance_sheets]
+    if len(total_debt_only) < num_years: return "Insufficient data"
+    average_total_debt = sum(total_debt_only[-num_years:]) / num_years
+
+    if average_total_debt == 0: return "Total debt cannot be zero"
+    return average_interest_expense / average_total_debt
 
 # UNIT TESTING
 
