@@ -1,6 +1,6 @@
 import yfinance as yf
 from datetime import datetime, timedelta
-from data_repository.database_utils import save_cash_flow_statements_data, save_income_statements_data, save_balance_sheets_data, save_data_to_database, get_stored_cash_flow_statements_raw, get_stored_income_statements_raw, get_stored_balance_sheets_raw, SQL_QUERY_CREATE_TABLE_SHARE_PRICE, SQL_QUERY_INSERT_SHARE_PRICE, SQL_QUERY_CREATE_TABLE_SHARES_AMOUNT, SQL_QUERY_INSERT_SHARES_AMOUNT, SQL_QUERY_CREATE_TABLE_SHARE_PRICES_IN_PERIOD, SQL_QUERY_INSERT_SHARE_PRICE_PERIOD
+from data_repository.database_utils import save_financial_statements_data, save_data_to_database, get_stored_financial_statements_raw, SQL_CREATE_TABLE_SHARE_PRICE, SQL_INSERT_SHARE_PRICE, SQL_CREATE_TABLE_SHARES_AMOUNT, SQL_INSERT_SHARES_AMOUNT, SQL_CREATE_TABLE_SHARE_PRICES_IN_PERIOD, SQL_INSERT_SHARE_PRICE_PERIOD
 import contextlib
 import requests
 import os
@@ -15,8 +15,8 @@ def fetch_cash_flow_statements(ticker, number_of_reports_for_calculations, numbe
     try:
         print("DOWNLOADING CASH FLOW STATEMENTS FOR: " + ticker)
         response = requests.get((API_ENDPOINT_CASH_FLOW_STATEMENTS + ticker), params={"apikey": API_KEY, "period": "quarterly"})
-        save_cash_flow_statements_data(response.json(), ticker) if response.ok else print(f"Error fetching data: {ticker}: {response.status_code} - {response.reason}")
-        recent_reports = get_stored_cash_flow_statements_raw(ticker, date, number_of_reports_for_calculations)
+        save_financial_statements_data("cash_flow_statement", response.json(), ticker) if response.ok else print(f"Error fetching data: {ticker}: {response.status_code} - {response.reason}")
+        recent_reports = get_stored_financial_statements_raw("cash_flow_statement", ticker, date, number_of_reports_for_calculations)
         if not recent_reports: raise ValueError("ERROR: Empty list")
         return recent_reports
     except Exception as e: print(f"Error fetch_cash_flow_statements: Request failed: {ticker} - {e}")
@@ -25,8 +25,8 @@ def fetch_income_statements(ticker, number_of_reports_for_calculations, number_o
     try:
         print("DOWNLOADING INCOME STATEMENTS FOR: " + ticker)
         response = requests.get((API_ENDPOINT_INCOME_STATEMENTS + ticker), params={"apikey": API_KEY, "period": "quarterly"})
-        save_income_statements_data(response.json(), ticker) if response.ok else print(f"Error fetching data: {ticker}: {response.status_code} - {response.reason}")
-        recent_reports = get_stored_income_statements_raw(ticker, date, number_of_reports_for_calculations)
+        save_financial_statements_data("income_statement", response.json(), ticker) if response.ok else print(f"Error fetching data: {ticker}: {response.status_code} - {response.reason}")
+        recent_reports = get_stored_financial_statements_raw("income_statement", ticker, date, number_of_reports_for_calculations)
         if not recent_reports: raise ValueError("ERROR: Empty list")
         return recent_reports
     except Exception as e: print(f"Error fetch_income_statements: Request failed: {ticker} - {e}")
@@ -35,8 +35,8 @@ def fetch_balance_sheets(ticker, number_of_reports_for_calculations, number_of_r
     try:
         print("DOWNLOADING BALANCE SHEETS FOR: " + ticker)
         response = requests.get((API_ENDPOINT_BALANCE_SHEETS + ticker), params={"apikey": API_KEY, "period": "quarterly"})
-        save_balance_sheets_data(response.json(), ticker) if response.ok else print(f"Error fetching data: {ticker}: {response.status_code} - {response.reason}")
-        recent_reports = get_stored_balance_sheets_raw(ticker, date, number_of_reports_for_calculations)
+        save_financial_statements_data("balance_sheet", response.json(), ticker) if response.ok else print(f"Error fetching data: {ticker}: {response.status_code} - {response.reason}")
+        recent_reports = get_stored_financial_statements_raw("balance_sheet", ticker, date, number_of_reports_for_calculations)
         if not recent_reports: raise ValueError("ERROR: Empty list")
         return recent_reports
     except Exception as e: print(f"Error fetch_balance_sheets: Request failed: {ticker} - {e}")
@@ -47,7 +47,7 @@ def fetch_share_price_daily(company, date, date_format = "%Y-%m-%d"):
             share_prices_table = yf.download(company, start=date, end=(datetime.strptime(date, date_format) + timedelta(days=1)), progress=False)
             if not share_prices_table.empty:
                 share_price = _turn_price_table_into_average_price(share_prices_table)[0]
-                save_data_to_database(SQL_QUERY_CREATE_TABLE_SHARE_PRICE, SQL_QUERY_INSERT_SHARE_PRICE, float(share_price), company, date) # Caching
+                save_data_to_database(SQL_CREATE_TABLE_SHARE_PRICE, SQL_INSERT_SHARE_PRICE, float(share_price), company, date) # Caching
                 return share_price
             date = (datetime.strptime(date, date_format) - timedelta(days=1)).strftime(date_format)
     raise ValueError("No data available for the specified date after 5 attempts.")
@@ -56,7 +56,7 @@ def fetch_share_prices_per_period(company, start_date, end_date, date_format = "
     share_prices_table = yf.download(company, start=start_date, end=end_date, progress=False)
     if not share_prices_table.empty:
         averaged_prices = [_turn_price_table_into_average_price(share_prices_table)]
-        save_data_to_database(SQL_QUERY_CREATE_TABLE_SHARE_PRICES_IN_PERIOD, SQL_QUERY_INSERT_SHARE_PRICE_PERIOD, company, start_date, end_date, json.dumps(averaged_prices)) # Caching
+        save_data_to_database(SQL_CREATE_TABLE_SHARE_PRICES_IN_PERIOD, SQL_INSERT_SHARE_PRICE_PERIOD, company, start_date, end_date, json.dumps(averaged_prices)) # Caching
         return averaged_prices
     raise ValueError("Error fetch_share_prices_per_period: share_prices_table empty")
 
@@ -66,7 +66,7 @@ def fetch_total_amount_of_shares_on_particular_day(company, date):
     for attempt in range(3):
         try:
             value = yf.Ticker(company).get_shares_full(start=date)[0] # Throws exception if no data found
-            save_data_to_database(SQL_QUERY_CREATE_TABLE_SHARES_AMOUNT, SQL_QUERY_INSERT_SHARES_AMOUNT, int(value), company, date) # Caching
+            save_data_to_database(SQL_CREATE_TABLE_SHARES_AMOUNT, SQL_INSERT_SHARES_AMOUNT, int(value), company, date) # Caching
             return value
         except Exception as e:
             print(f"No data returned for company {company} on {date} attempt {attempt + 1} {e}")

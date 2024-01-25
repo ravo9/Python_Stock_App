@@ -1,4 +1,4 @@
-from data_repository.database_utils import get_stored_value_if_available, get_stored_cash_flow_statements_if_available, get_stored_income_statements_if_available, get_stored_balance_sheets_if_available, SQL_QUERY_EXISTING_SHARE_PRICE, SQL_QUERY_EXISTING_SHARES_AMOUNT, SQL_QUERY_EXISTING_SHARE_PRICES_IN_PERIOD
+from data_repository.database_utils import get_stored_value_if_available, get_stored_financial_statements_if_available, SQL_EXISTING_SHARE_PRICE, SQL_EXISTING_SHARES_AMOUNT, SQL_EXISTING_SHARE_PRICES_IN_PERIOD
 from data_repository.api_utils import fetch_share_price_daily, fetch_share_prices_per_period, fetch_total_amount_of_shares_on_particular_day, fetch_cash_flow_statements, fetch_income_statements, fetch_balance_sheets
 from datetime import datetime, timedelta
 import json
@@ -7,29 +7,21 @@ from unittest.mock import Mock, patch
 
 DATE_FORMAT = "%Y-%m-%d"
 
-def retrieve_cash_flow_statements(number_of_reports_for_calculations, number_of_reports_to_fetch, ticker, date):
-    stored_value = get_stored_cash_flow_statements_if_available(number_of_reports_for_calculations, number_of_reports_to_fetch, ticker, date)
-    if stored_value != None: return stored_value
-    return fetch_cash_flow_statements(ticker, number_of_reports_for_calculations, number_of_reports_to_fetch, date)
-
-def retrieve_income_statements(number_of_reports_for_calculations, number_of_reports_to_fetch, ticker, date):
-    stored_value = get_stored_income_statements_if_available(number_of_reports_for_calculations, number_of_reports_to_fetch, ticker, date)
-    if stored_value != None: return stored_value
-    return fetch_income_statements(ticker, number_of_reports_for_calculations, number_of_reports_to_fetch, date)
-
-def retrieve_balance_sheets(number_of_reports_for_calculations, number_of_reports_to_fetch, ticker, date):
-    stored_value = get_stored_balance_sheets_if_available(number_of_reports_for_calculations, number_of_reports_to_fetch, ticker, date)
-    if stored_value != None: return stored_value
-    return fetch_balance_sheets(ticker, number_of_reports_for_calculations, number_of_reports_to_fetch, date)
+def retrieve_financial_statements(statement_type, number_of_reports_for_calculations, number_of_reports_to_fetch, ticker, date):
+    if statement_type == 'cash_flow_statement': fetch_function = fetch_cash_flow_statements
+    elif statement_type == 'income_statement': fetch_function = fetch_income_statements
+    elif statement_type == 'balance_sheet': fetch_function = fetch_balance_sheets
+    stored_value = get_stored_financial_statements_if_available(statement_type, number_of_reports_for_calculations, number_of_reports_to_fetch, ticker, date)
+    return stored_value if stored_value is not None else fetch_function(ticker, number_of_reports_for_calculations, number_of_reports_to_fetch, date)
 
 def retrieve_share_price_daily(company, date, date_format = DATE_FORMAT):
-    stored_value = get_stored_value_if_available(SQL_QUERY_EXISTING_SHARE_PRICE, company, date) # Caching
+    stored_value = get_stored_value_if_available(SQL_EXISTING_SHARE_PRICE, company, date) # Caching
     if stored_value != None: return stored_value
     return fetch_share_price_daily(company, date, date_format)
 
 def retrieve_share_prices_per_period(company, start_date, end_date, date_format = DATE_FORMAT):
     end_date = (datetime.strptime(end_date, date_format) + timedelta(days=1)).strftime(date_format) # Caching
-    stored_value = get_stored_value_if_available(SQL_QUERY_EXISTING_SHARE_PRICES_IN_PERIOD, company, start_date, end_date)
+    stored_value = get_stored_value_if_available(SQL_EXISTING_SHARE_PRICES_IN_PERIOD, company, start_date, end_date)
     if stored_value != None: return json.loads(stored_value)
     return fetch_share_prices_per_period(company, start_date, end_date, date_format)
 
@@ -37,7 +29,7 @@ def retrieve_total_amount_of_shares_on_particular_day(company, date_str):
     # Todo: 1. this is making problems with current date as date - delay around 10 days sometimes 2.optimise (not reason to fetch this whole table).
     date = datetime.strptime(date_str, DATE_FORMAT)
     attempts = 0
-    stored_value = get_stored_value_if_available(SQL_QUERY_EXISTING_SHARES_AMOUNT, company, date) # Caching
+    stored_value = get_stored_value_if_available(SQL_EXISTING_SHARES_AMOUNT, company, date) # Caching
     if stored_value != None: return stored_value  # sometimes was spotted missing in a big dataset (when should've been already cached)
     return fetch_total_amount_of_shares_on_particular_day(company, date)
 
