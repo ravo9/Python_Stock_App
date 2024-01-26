@@ -38,9 +38,11 @@ def calculate_weights(companies, date, number_of_reports_for_calculation):
         balance_sheets = retrieve_financial_statements("balance_sheet", number_of_reports_for_calculation, NUMBER_OF_REPORTS_TO_FETCH_FROM_API, ticker, date)
         all_shares_amount  = retrieve_total_amount_of_shares_on_particular_day(ticker, date)
         share_price_for_this_date = retrieve_share_price_daily(ticker, date)
-        # average_real_value_over_analysed_reports = calculate_value_by_free_cash_flow(cash_flow_statements)
-        average_real_value_over_analysed_reports = calculate_intrinsic_value(cash_flow_statements, income_statements, balance_sheets, number_of_reports_for_calculation, 5)
+        average_real_value_over_analysed_reports = calculate_value_by_free_cash_flow(cash_flow_statements)
+        # average_real_value_over_analysed_reports = calculate_intrinsic_value(cash_flow_statements, income_statements, balance_sheets, number_of_reports_for_calculation, 5)
         value_per_dollar_spent = average_real_value_over_analysed_reports / all_shares_amount / share_price_for_this_date
+        # Todo: This line below is to be connected with calculate_average_market_value_per_dollar
+        # print(f"Average value per dollar spent for {ticker} on {date} : {value_per_dollar_spent}")
         calculated_weights.append((ticker, value_per_dollar_spent))
     return calculated_weights
 
@@ -49,14 +51,11 @@ def find_out_value_per_dollar_spent_today(companies, date, number_of_reports_in_
 
 def calculate_value_by_free_cash_flow(cash_flow_statements): return sum(report[ATTRIBUTE_OF_DECISION_INDEX] for report in cash_flow_statements) / len(cash_flow_statements)
 
-# Experimental
 def calculate_intrinsic_value(cash_flow_statements, income_statements, balance_sheets, num_periods, projection_years):
-    """
-    num_periods: Number of quarters/years to consider for averaging the FCF.
-    growth_rate: Annual growth rate of FCF.
-    discount_rate: Discount rate to calculate present value.
-    projection_years: Number of years to project FCF into the future.
-    """
+    # num_periods: Number of quarters/years to consider for averaging the FCF.
+    # growth_rate: Annual growth rate of FCF.
+    # discount_rate: Discount rate to calculate present value.
+    # projection_years: Number of years to project FCF into the future.
     average_fcf = calculate_average_free_cash_flow(cash_flow_statements, num_periods)
     growth_rate = calculate_growth_rate(cash_flow_statements)
     discount_rate = calculate_discount_rate(income_statements, balance_sheets, num_periods)
