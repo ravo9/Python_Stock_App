@@ -1,5 +1,5 @@
-from data_repository.database_utils import get_stored_value_if_available, get_stored_financial_statements_if_available, SQL_EXISTING_SHARE_PRICE, SQL_EXISTING_SHARES_AMOUNT, SQL_EXISTING_SHARE_PRICES_IN_PERIOD
-from data_repository.api_utils import fetch_share_price_daily, fetch_share_prices_per_period, fetch_total_amount_of_shares_on_particular_day, fetch_financial_statements
+from .database_utils import get_stored_value_if_available, get_stored_financial_statements_if_available, SQL_EXISTING_SHARE_PRICE, SQL_EXISTING_SHARES_AMOUNT, SQL_EXISTING_SHARE_PRICES_IN_PERIOD
+from .api_utils import fetch_share_price_daily, fetch_share_prices_per_period, fetch_total_amount_of_shares_on_particular_day, fetch_financial_statements
 from datetime import datetime, timedelta
 import json
 import unittest
@@ -33,8 +33,8 @@ def retrieve_total_amount_of_shares_on_particular_day(company, date_str):
 
 class TestRetrieveFinancialReports(unittest.TestCase):
 
-    @patch('data_repository.database_utils.get_stored_cash_flow_statements_if_available')
-    @patch('data_repository.api_utils.fetch_cash_flow_statements')
+    @patch('data_repository.database_utils.get_stored_financial_statements_if_available')
+    @patch('data_repository.api_utils.fetch_financial_statements')
     def test_retrieve_from_fetch(self, mock_fetch, mock_get_stored):
         # Setup
         test_ticker = ['AAPL', 'TSLA']
@@ -46,7 +46,7 @@ class TestRetrieveFinancialReports(unittest.TestCase):
         # Execute
         results = []
         for ticker in test_ticker:
-            results += retrieve_cash_flow_statements(test_number_of_reports_for_calculations, test_number_of_reports_to_fetch, ticker, test_date)
+            results += retrieve_financial_statements("cash_flow_statement", test_number_of_reports_for_calculations, test_number_of_reports_to_fetch, ticker, test_date)
         # Verify
         self.assertEqual(len(results), 16)
 
