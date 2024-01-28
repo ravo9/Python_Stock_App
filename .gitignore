@@ -121,5 +121,5 @@ cython_debug/
 .DS_Store
 
 # Project - specific:
-results_output/
 database.db
+code/profile_stats
