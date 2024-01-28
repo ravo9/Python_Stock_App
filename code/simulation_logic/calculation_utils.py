@@ -38,8 +38,6 @@ def calculate_weights(companies, date, number_of_reports_for_calculation):
         average_real_value_over_analysed_reports = calculate_value_by_free_cash_flow(number_of_reports_for_calculation, ticker, date)
         # average_real_value_over_analysed_reports = calculate_value_by_intrinsic_value(ticker, date, number_of_reports_for_calculation, 5)
         value_per_dollar_spent = average_real_value_over_analysed_reports / all_shares_amount / share_price_for_this_date
-        # Todo: This line below is to be connected with calculate_average_market_value_per_dollar
-        # print(f"Average value per dollar spent for {ticker} on {date} : {value_per_dollar_spent}")
         calculated_weights.append((ticker, value_per_dollar_spent))
     return calculated_weights
 
