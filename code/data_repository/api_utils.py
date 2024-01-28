@@ -1,6 +1,6 @@
 import yfinance as yf
 from datetime import datetime, timedelta
-from data_repository.database_utils import save_financial_statements_data, save_data_to_database, get_stored_financial_statements_raw, SQL_CREATE_SHARE_PRICE, SQL_INSERT_SHARE_PRICE, SQL_CREATE_SHARES_AMOUNT, SQL_INSERT_SHARES_AMOUNT, SQL_CREATE_SHARE_PRICES_IN_PERIOD, SQL_INSERT_SHARE_PRICE_PERIOD
+from .database_utils import save_financial_statements_data, save_data_to_database, get_stored_financial_statements_raw, SQL_CREATE_SHARE_PRICE, SQL_INSERT_SHARE_PRICE, SQL_CREATE_SHARES_AMOUNT, SQL_INSERT_SHARES_AMOUNT, SQL_CREATE_SHARE_PRICES_IN_PERIOD, SQL_INSERT_SHARE_PRICE_PERIOD
 import contextlib
 import requests
 import os

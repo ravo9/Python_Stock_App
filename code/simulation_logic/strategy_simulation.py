@@ -1,10 +1,5 @@
-import sys
-import os
-current_dir = os.path.dirname(os.path.abspath(__file__))
-parent_dir = os.path.dirname(current_dir)
-sys.path.insert(0, parent_dir)
-from simulation_logic.calculation_utils import calculate_investment_value_change, calculate_average_share_price_change_for_given_companies_in_given_period, calculate_weights
-from simulation_logic.date_utils import split_whole_period_into_chunks
+from .calculation_utils import calculate_investment_value_change, calculate_average_share_price_change_for_given_companies_in_given_period, calculate_weights
+from .date_utils import split_whole_period_into_chunks
 
 def run_multiple_simulations(companies, start_date, end_date, SUB_PERIOD_LENGTH_IN_DAYS_ARRAY, NUMBER_OF_REPORTS_TAKEN_FOR_CALCULATION_ARRAY):
     for sub_period_length in SUB_PERIOD_LENGTH_IN_DAYS_ARRAY:
@@ -47,16 +42,11 @@ def calculate_average_market_value_per_dollar(companies, start_date, end_date, p
         _display_progress(acc, len(sub_period_dates))
         acc += 1
         sub_period_weights = calculate_weights(companies, sub_period_start_date, number_of_reports_for_calculation)
-        average_value = average_real_value_per_dollar(sub_period_weights, sub_period_start_date)
+        average_value = sum(value for ticker, value in sub_period_weights) / len(sub_period_weights)
         if sub_period_weights: print(f"Average value per dollar spent for given companies on {sub_period_start_date} : {average_value}\n")
         average_value_per_dollar_spent_across_sub_periods += average_value
     return average_value_per_dollar_spent_across_sub_periods/len(sub_period_dates)
     print("AVERAGE VALUE PER DOLLAR SPENT ACROSS WHOLE PERIOD: " + str(average_value_per_dollar_spent_across_sub_periods/len(sub_period_dates)))
-
-# Todo: necessary function?
-def average_real_value_per_dollar(real_values, date):
-    average_value = sum(value for ticker, value in real_values) / len(real_values)
-    return average_value if average_value else None
 
 def _display_progress(acc, total_length): print(f"{((acc/total_length) * 100):.2f}%", end='\r')
 

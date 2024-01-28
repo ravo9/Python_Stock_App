@@ -1,6 +1,6 @@
 FINANCIAL_MODELING_COMPANIES_SET = [
-    'MSFT', 'NFLX', 'AMZN', 'GOOGL', 'AAPL', # Tested with at least x reports
-    'META', 'NVDA', 'TSLA', 'VZ', 'KO', # Tested with at least x reports
+    'MSFT', 'NFLX', 'AMZN', 'GOOGL', 'AAPL', # Tested
+    'META', 'NVDA', 'TSLA', 'VZ', 'KO', # Tested
 ]
 
 START_DATE = '2023-01-01'
