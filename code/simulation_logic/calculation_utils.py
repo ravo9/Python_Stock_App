@@ -6,11 +6,13 @@ current_dir = os.path.dirname(os.path.abspath(__file__))
 parent_dir = os.path.dirname(current_dir)
 sys.path.insert(0, parent_dir)
 from data_repository.data_repository import retrieve_financial_statements, retrieve_share_price_daily, retrieve_share_prices_per_period, retrieve_total_amount_of_shares_on_particular_day
-from config import NUMBER_OF_REPORTS_TO_FETCH_FROM_API
 
 ATTRIBUTE_OF_DECISION_INDEX = 2
 
 calculate_change_in_share_price = lambda first_day_price, last_day_price: (last_day_price - first_day_price)/first_day_price
+
+# Not used at the moment
+NUMBER_OF_REPORTS_TO_FETCH_FROM_API = 6
 
 # If we check difference between 01.01.23 and 0.1.01.24, and the last day is not available - then it will actually check 01.01.23 - 29.12.23.
 def calculate_average_share_price_change_for_given_companies_in_given_period(companies_tickers, start_date, end_date):
