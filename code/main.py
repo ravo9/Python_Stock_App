@@ -1,4 +1,4 @@
-from simulation_logic.strategy_simulation import run_multiple_simulations, calculate_average_market_value_per_dollar, _run_simulation
+from simulation_logic.strategy_simulation import run_multiple_simulations, calculate_average_market_value_per_dollar, run_simulation
 from simulation_logic.calculation_utils import find_out_value_per_dollar_spent_today, TestCalculateChangeInSharePrice, TestCalculateAverageSharePriceChange, TestCalculateChangeInSharePrice, TestCalculateAverageSharePriceChange # For unit tests the tests has to be imported to 'main'.
 from data_repository.database_utils import read_all_data_from_database
 from data_repository.data_repository import TestRetrieveFinancialReports, TestRetrieveSharePriceDaily, TestRetrieveTotalAmountOfSharesOnParticularDay
@@ -15,4 +15,4 @@ run_multiple_simulations(COMPANIES_SET, START_DATE, END_DATE, SUB_PERIOD_LENGTH_
 # run_unit_tests()
 # read_all_data_from_database()
 # run_profiler('run_multiple_simulations(COMPANIES_SET, START_DATE, END_DATE, SUB_PERIOD_LENGTH_IN_DAYS_ARRAY, NUMBER_OF_REPORTS_TAKEN_FOR_CALCULATION_ARRAY)')
-# find_optimal_parameters(_run_simulation, SUB_PERIOD_LENGTH_IN_DAYS_ARRAY, NUMBER_OF_REPORTS_TAKEN_FOR_CALCULATION_ARRAY)
+# find_optimal_parameters(run_simulation, SUB_PERIOD_LENGTH_IN_DAYS_ARRAY, NUMBER_OF_REPORTS_TAKEN_FOR_CALCULATION_ARRAY)
