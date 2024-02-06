@@ -10,6 +10,7 @@ def run_profiler(command):
     p = pstats.Stats('profile_stats')
     p.sort_stats('time').print_stats(10)
 
+# Finding parameters doesn't work well enough.
 def objective_function(x, *args):
     companies_set, start_date, end_date, tested_function = args[:4]
     optimized_params = x.tolist()

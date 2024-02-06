@@ -11,7 +11,7 @@ def _run_simulation(companies, start_date, end_date, period_length_in_days, numb
     change_in_value_of_money_invested_equally = calculate_average_share_price_change_for_given_companies_in_given_period(companies, start_date, end_date)
     # Get back in time. Invest given money given companies not equally, but accordingly to the tested strategy (expressed by bets/ weights values).
     change_in_value_of_money_invested_by_using_tested_strategy = _perform_simulation_logic(companies, start_date, end_date, period_length_in_days, number_of_reports_for_calculation)
-    _present_simulation_results(change_in_value_of_money_invested_equally, change_in_value_of_money_invested_by_using_tested_strategy)
+    _present_simulation_results(change_in_value_of_money_invested_equally, change_in_value_of_money_invested_by_using_tested_strategy, period_length_in_days, number_of_reports_for_calculation)
     return change_in_value_of_money_invested_by_using_tested_strategy # Used by otimisation.
 
 def _perform_simulation_logic(companies, start_date, end_date, period_length_in_days, number_of_reports_for_calculation, original_money = 1000):
@@ -52,6 +52,7 @@ def calculate_average_market_value_per_dollar(companies, start_date, end_date, p
 
 def _display_progress(acc, total_length): print(f"{((acc/total_length) * 100):.2f}%", end='\r')
 
-def _present_simulation_results(money_invested_equally, money_invested_according_to_strategy):
+def _present_simulation_results(money_invested_equally, money_invested_according_to_strategy, period_length_in_days, number_of_reports_for_calculation):
+    print("SIMULATION: PERIOD: " + str(period_length_in_days) + " DAYS; REPORTS NUMBER: " + str(number_of_reports_for_calculation))
     print("MONEY INVESTED IN GIVEN COMPANIES EQUALLY (AVERAGE): " + "{0:.2%}".format(money_invested_equally))
     print("MONEY INVESTED IN GIVEN COMPANIES USING TESTED STRATEGY: " + "{0:.2%}".format(money_invested_according_to_strategy))
