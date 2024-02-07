@@ -47,7 +47,11 @@ def _turn_price_table_into_average_price(share_prices_table): return ((share_pri
 def fetch_total_amount_of_shares_on_particular_day(company, date):
     for attempt in range(3):
         try:
-            value = yf.Ticker(company).get_shares_full(start=date)[0] # Throws exception if no data found
+            data = yf.Ticker(company)
+            value = data.get_shares_full(start=date)[0] # Throws exception if no data found
+            # print("TESTO 2")
+            # print(company)
+            # print(data.get_splits())
             save_data_to_database(SQL_CREATE_SHARES_AMOUNT, SQL_INSERT_SHARES_AMOUNT, int(value), company, date) # Caching
             return value
         except Exception as e:

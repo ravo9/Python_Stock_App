@@ -43,9 +43,17 @@ def calculate_average_market_value_per_dollar(companies, start_date, end_date, p
         _display_progress(acc, len(sub_period_dates))
         acc += 1
         sub_period_weights = calculate_weights(companies, sub_period_start_date, number_of_reports_for_calculation)
-        for ticker, value_per_dollar_spent in sub_period_weights: print(f"Average value per dollar spent for {ticker} on {sub_period_start_date} : {value_per_dollar_spent}")
+
+        print(sub_period_start_date)
+
+        for ticker, value_per_dollar_spent in sub_period_weights:
+            # print(f"Average value per dollar spent for {ticker} on {sub_period_start_date} : {value_per_dollar_spent}")
+            print(value_per_dollar_spent)
         average_value = sum(value for ticker, value in sub_period_weights) / len(sub_period_weights)
-        if sub_period_weights: print(f"Average value per dollar spent for given companies on {sub_period_start_date} : {average_value}\n")
+        if sub_period_weights:
+            # print(f"Average value per dollar spent for given companies on {sub_period_start_date} : {average_value}\n")
+            print(average_value)
+            print("\n")
         average_value_per_dollar_spent_across_sub_periods += average_value
     print("AVERAGE VALUE PER DOLLAR SPENT ACROSS WHOLE PERIOD: " + str(average_value_per_dollar_spent_across_sub_periods/len(sub_period_dates)))
     return average_value_per_dollar_spent_across_sub_periods/len(sub_period_dates)

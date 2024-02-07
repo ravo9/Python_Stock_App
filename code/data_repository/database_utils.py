@@ -50,6 +50,9 @@ def get_stored_financial_statements_if_available(statement_type, number_of_repor
             if are_reports_stored:
                 reports = con.execute(sql_recent_statements[statement_type], (ticker, date, number_of_reports_for_calculations)).fetchall()
                 if not reports: raise ValueError("ERROR: Empty list")
+                if (len(reports) < number_of_reports_to_fetch):
+                    print("Error: not enough reports for " + ticker)
+                    print("Fetched " + str(len(reports)) + " out of required " + str(number_of_reports_for_calculations))
                 return reports
         except Exception as e:
             print(f"Error in get_stored_financial_statements_if_available {statement_type}: Request failed: {ticker} - {e}")
