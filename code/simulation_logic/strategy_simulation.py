@@ -1,5 +1,6 @@
 from .calculation_utils import calculate_investment_value_change, calculate_average_share_price_change_for_given_companies_in_given_period, calculate_weights
 from .date_utils import split_whole_period_into_chunks
+import time
 
 def run_multiple_simulations(companies, start_date, end_date, SUB_PERIOD_LENGTH_IN_DAYS_ARRAY, NUMBER_OF_REPORTS_TAKEN_FOR_CALCULATION_ARRAY):
     for sub_period_length in SUB_PERIOD_LENGTH_IN_DAYS_ARRAY:
@@ -17,13 +18,20 @@ def run_simulation(companies, start_date, end_date, period_length_in_days, numbe
 def _perform_simulation_logic(companies, start_date, end_date, period_length_in_days, number_of_reports_for_calculation, original_money = 1000):
     sub_period_dates = split_whole_period_into_chunks(start_date, end_date, period_length_in_days)
     money = original_money
+
+    start_time = time.time()
+
     for index, (sub_period_start_date, sub_period_end_date) in enumerate(sub_period_dates):
-        _display_progress(index + 1, len(sub_period_dates))
+        _display_progress(index + 1, len(sub_period_dates), money)
         sub_period_weights = calculate_weights(companies, sub_period_start_date, number_of_reports_for_calculation)
         # if index != 0:
         #     sub_period_weights = modify_weights(sub_period_weights, start_date, sub_period_end_date, period_length_in_days, number_of_reports_for_calculation)
         investment_change = calculate_investment_value_change(sub_period_weights, sub_period_start_date, sub_period_end_date)
         money *= (1 + investment_change)
+
+    execution_time = time.time() - start_time
+    print("Execution time:", execution_time, "seconds")
+
     return (money - original_money)/ original_money
 
 def modify_weights(sub_period_weights, start_date, end_date, period_length_in_days, number_of_reports_for_calculation):
@@ -58,7 +66,7 @@ def calculate_average_market_value_per_dollar(companies, start_date, end_date, p
     print("AVERAGE VALUE PER DOLLAR SPENT ACROSS WHOLE PERIOD: " + str(average_value_per_dollar_spent_across_sub_periods/len(sub_period_dates)))
     return average_value_per_dollar_spent_across_sub_periods/len(sub_period_dates)
 
-def _display_progress(acc, total_length): print(f"{((acc/total_length) * 100):.2f}%", end='\r')
+def _display_progress(acc, total_length, money): print(f"{((acc/total_length) * 100):.2f}%" + " " + str(money), end='\r')
 
 def _present_simulation_results(money_invested_equally, money_invested_according_to_strategy, period_length_in_days, number_of_reports_for_calculation):
     print("SIMULATION: PERIOD: " + str(period_length_in_days) + " DAYS; REPORTS NUMBER: " + str(number_of_reports_for_calculation))

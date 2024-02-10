@@ -27,10 +27,10 @@ DATABASE_PATH = "../database.db"
 def _initialize_database(SQL_):
     with sl.connect(DATABASE_PATH) as con: con.execute(SQL_)
 
-def save_financial_statements_data(statement_type, financial_data, ticker):
+def save_financial_statements_data(statement_type, financial_data, ticker, tested_property='operatingCashFlow'):
     for report in financial_data:
         date = report['filing_date'] if 'filing_date' in report else report['date']
-        if statement_type == 'cash_flow_statement': save_data_to_database(SQL_CREATE_CASH_FLOW_STATEMENT, SQL_INSERT_CASH_FLOW_STATEMENT, ticker, date, report['freeCashFlow'])
+        if statement_type == 'cash_flow_statement': save_data_to_database(SQL_CREATE_CASH_FLOW_STATEMENT, SQL_INSERT_CASH_FLOW_STATEMENT, ticker, date, report[tested_property])
         elif statement_type == 'income_statement': save_data_to_database(SQL_CREATE_INCOME_STATEMENT, SQL_INSERT_INCOME_STATEMENT, ticker, date, report['interestExpense'])
         elif statement_type == 'balance_sheet': save_data_to_database(SQL_CREATE_BALANCE_SHEET, SQL_INSERT_BALANCE_SHEET, ticker, date, report['totalDebt'])
 
@@ -50,7 +50,7 @@ def get_stored_financial_statements_if_available(statement_type, number_of_repor
             if are_reports_stored:
                 reports = con.execute(sql_recent_statements[statement_type], (ticker, date, number_of_reports_for_calculations)).fetchall()
                 if not reports: raise ValueError("ERROR: Empty list")
-                if (len(reports) < number_of_reports_to_fetch):
+                if (len(reports) < number_of_reports_for_calculations):
                     print("Error: not enough reports for " + ticker)
                     print("Fetched " + str(len(reports)) + " out of required " + str(number_of_reports_for_calculations))
                 return reports
