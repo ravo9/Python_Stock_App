@@ -12,7 +12,11 @@ API_ENDPOINT_BALANCE_SHEETS = "https://financialmodelingprep.com/api/v3/balance-
 API_KEY = "ee22bac37cfc64407760039b37d56065"
 
 def fetch_financial_statements(statement_type, ticker, number_of_reports_for_calculations, number_of_reports_to_fetch, date):
-    api_endpoints = {'cash_flow_statement': API_ENDPOINT_CASH_FLOW_STATEMENTS, 'income_statement': API_ENDPOINT_INCOME_STATEMENTS, 'balance_sheet': API_ENDPOINT_BALANCE_SHEETS}
+    api_endpoints = {
+        'cash_flow_statement': API_ENDPOINT_CASH_FLOW_STATEMENTS,
+        'income_statement': API_ENDPOINT_INCOME_STATEMENTS,
+        'balance_sheet': API_ENDPOINT_BALANCE_SHEETS
+    }
     try:
         print(f"DOWNLOADING {statement_type.replace('_', ' ').upper()} FOR: {ticker}")
         response = requests.get((api_endpoints[statement_type] + ticker), params={"apikey": API_KEY, "period": "quarterly"})
@@ -49,12 +53,15 @@ def fetch_total_amount_of_shares_on_particular_day(company, date):
         try:
             data = yf.Ticker(company)
             value = data.get_shares_full(start=date)[0] # Throws exception if no data found
-            # print("TESTO 2")
-            # print(company)
-            # print(data.get_splits())
+            findSplits(company, data)
             save_data_to_database(SQL_CREATE_SHARES_AMOUNT, SQL_INSERT_SHARES_AMOUNT, int(value), company, date) # Caching
             return value
         except Exception as e:
             print(f"No data returned for company {company} on {date} attempt {attempt + 1} {e}")
             date -= timedelta(weeks=1)
     return None
+
+def findSplits(company, data)
+    print("SPLITS FOUND:")
+    print(company)
+    print(data.get_splits())

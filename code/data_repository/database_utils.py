@@ -45,8 +45,8 @@ def get_stored_financial_statements_if_available(statement_type, number_of_repor
     sql_recent_statements = {'cash_flow_statement': SQL_MOST_RECENT_CASH_FLOW_STATEMENTS,'income_statement': SQL_MOST_RECENT_INCOME_STATEMENTS, 'balance_sheet': SQL_MOST_RECENT_BALANCE_SHEETS}
     with sl.connect(DATABASE_PATH) as con:
         try:
+            # Todo: I should check if len(are_reports_stored) is longer than number_of_reports_to_fetch, not 0.
             are_reports_stored = len(con.execute(sql_existing_statements[statement_type], (ticker,)).fetchall()) > 0
-            # are_reports_stored = len(existing_reports) >= number_of_reports_to_fetch
             if are_reports_stored:
                 reports = con.execute(sql_recent_statements[statement_type], (ticker, date, number_of_reports_for_calculations)).fetchall()
                 if not reports: raise ValueError("ERROR: Empty list")
