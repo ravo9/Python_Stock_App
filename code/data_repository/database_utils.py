@@ -27,7 +27,7 @@ DATABASE_PATH = "../database.db"
 def _initialize_database(SQL_):
     with sl.connect(DATABASE_PATH) as con: con.execute(SQL_)
 
-def save_financial_statements_data(statement_type, financial_data, ticker, tested_property='operatingCashFlow'):
+def save_financial_statements_data(statement_type, financial_data, ticker, tested_property='netIncome'):
     for report in financial_data:
         date = report['filing_date'] if 'filing_date' in report else report['date']
         if statement_type == 'cash_flow_statement': save_data_to_database(SQL_CREATE_CASH_FLOW_STATEMENT, SQL_INSERT_CASH_FLOW_STATEMENT, ticker, date, report[tested_property])

@@ -53,7 +53,7 @@ def fetch_total_amount_of_shares_on_particular_day(company, date):
         try:
             data = yf.Ticker(company)
             value = data.get_shares_full(start=date)[0] # Throws exception if no data found
-            findSplits(company, data)
+            # findSplits(company, data)
             save_data_to_database(SQL_CREATE_SHARES_AMOUNT, SQL_INSERT_SHARES_AMOUNT, int(value), company, date) # Caching
             return value
         except Exception as e:
@@ -61,7 +61,7 @@ def fetch_total_amount_of_shares_on_particular_day(company, date):
             date -= timedelta(weeks=1)
     return None
 
-def findSplits(company, data)
+def findSplits(company, data):
     print("SPLITS FOUND:")
     print(company)
     print(data.get_splits())
