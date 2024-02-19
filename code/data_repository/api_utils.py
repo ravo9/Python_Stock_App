@@ -38,14 +38,6 @@ def fetch_share_price_daily(company, date, date_format = "%Y-%m-%d"):
             date = (datetime.strptime(date, date_format) - timedelta(days=1)).strftime(date_format)
     raise ValueError("No data available for the specified date after 5 attempts.")
 
-def fetch_share_prices_per_period(company, start_date, end_date, date_format = "%Y-%m-%d"):
-    share_prices_table = yf.download(company, start=start_date, end=end_date, progress=False)
-    if not share_prices_table.empty:
-        averaged_prices = [_turn_price_table_into_average_price(share_prices_table)]
-        save_data_to_database(SQL_CREATE_SHARE_PRICES_IN_PERIOD, SQL_INSERT_SHARE_PRICE_PERIOD, company, start_date, end_date, json.dumps(averaged_prices)) # Caching
-        return averaged_prices
-    raise ValueError("Error fetch_share_prices_per_period: share_prices_table empty")
-
 def _turn_price_table_into_average_price(share_prices_table): return ((share_prices_table["High"] + share_prices_table["Low"]) / 2).tolist()
 
 def fetch_total_amount_of_shares_on_particular_day(company, date):

@@ -22,11 +22,11 @@
 # average: 4.33%
 # my best result: -12.63%
 # best setting: 25 days; 10 reports; strategy netIncome
-COMPANIES_SET = ['MSFT', 'NFLX', 'VZ', 'KO', 'MCD', 'JNJ', 'SBUX', 'BABA', 'DIS', 'ORCL', 'O', 'JPM']
-START_DATE = '2021-01-01'
-END_DATE = '2024-01-01'
-SUB_PERIOD_LENGTH_IN_DAYS_ARRAY = [100, 50, 25]
-NUMBER_OF_REPORTS_TAKEN_FOR_CALCULATION_ARRAY = [10]
+# COMPANIES_SET = ['MSFT', 'NFLX', 'VZ', 'KO', 'MCD', 'JNJ', 'SBUX', 'BABA', 'DIS', 'ORCL', 'O', 'JPM']
+# START_DATE = '2021-01-01'
+# END_DATE = '2024-01-01'
+# SUB_PERIOD_LENGTH_IN_DAYS_ARRAY = [100, 50, 25]
+# NUMBER_OF_REPORTS_TAKEN_FOR_CALCULATION_ARRAY = [10]
 
 # FINANCIAL_MODELING_COMPANIES_SET = [
 #     'MSFT', 'NFLX', # Tested
@@ -42,9 +42,9 @@ NUMBER_OF_REPORTS_TAKEN_FOR_CALCULATION_ARRAY = [10]
 # # * By Tested it has enough reports on the server, and didn't have split in tested period (01.01.22 - 01.01.24).
 # # Problem: splits (they're not taken into account by share price and amount of shares in the same way).
 # # Problem: single company is not giving the same result as average investment - in some cases (e.g. 90 days period)
-# COMPANIES_SET = FINANCIAL_MODELING_COMPANIES_SET
-# START_DATE = '2022-01-01'
-# END_DATE = '2024-01-01'
-# # Problem: Why quite often longer period performs better than short one?
-# SUB_PERIOD_LENGTH_IN_DAYS_ARRAY = [4]
-# NUMBER_OF_REPORTS_TAKEN_FOR_CALCULATION_ARRAY = [6]
+COMPANIES_SET = ['MSFT']
+START_DATE = '2023-01-01'
+END_DATE = '2024-01-01'
+# Problem: Why quite often longer period performs better than short one?
+SUB_PERIOD_LENGTH_IN_DAYS_ARRAY = [70]
+NUMBER_OF_REPORTS_TAKEN_FOR_CALCULATION_ARRAY = [6]

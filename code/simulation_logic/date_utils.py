@@ -2,13 +2,11 @@ import datetime
 DATE_FORMAT = "%Y-%m-%d"
 
 def split_whole_period_into_chunks(start_date, end_date, sub_period_in_days, date_format = DATE_FORMAT):
-
-    # Initialize an empty list to hold the sub-periods
     sub_period_dates = []
 
     # Convert start and end dates from strings to datetime objects
-    full_period_start_datetime = stipTime(start_date, date_format)
-    full_period_end_datetime = stipTime(end_date, date_format)
+    full_period_start_datetime = strpTime(start_date, date_format)
+    full_period_end_datetime = strpTime(end_date, date_format)
 
     # Initialize sub-period start and end dates
     sub_period_start_datetime = full_period_start_datetime
@@ -28,10 +26,10 @@ def split_whole_period_into_chunks(start_date, end_date, sub_period_in_days, dat
         sub_period_dates.append((sub_period_start_date, sub_period_end_date))
 
         # Move to the next sub-period
-        sub_period_start_datetime += datetime.timedelta(days=sub_period_in_days)
-        sub_period_end_datetime += datetime.timedelta(days=sub_period_in_days)
+        sub_period_start_datetime = sub_period_end_datetime
+        sub_period_end_datetime = sub_period_start_datetime + datetime.timedelta(days=sub_period_in_days)
 
     return sub_period_dates
 
-def stipTime(date, date_format):
+def strpTime(date, date_format):
     return datetime.datetime.strptime(date, date_format)

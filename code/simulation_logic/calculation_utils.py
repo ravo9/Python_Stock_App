@@ -5,7 +5,7 @@ from unittest.mock import patch
 current_dir = os.path.dirname(os.path.abspath(__file__))
 parent_dir = os.path.dirname(current_dir)
 sys.path.insert(0, parent_dir)
-from data_repository.data_repository import retrieve_financial_statements, retrieve_share_price_daily, retrieve_share_prices_per_period, retrieve_total_amount_of_shares_on_particular_day
+from data_repository.data_repository import retrieve_financial_statements, retrieve_share_price_daily, retrieve_total_amount_of_shares_on_particular_day
 
 ATTRIBUTE_OF_DECISION_INDEX = 2
 
@@ -18,8 +18,8 @@ NUMBER_OF_REPORTS_TO_FETCH_FROM_API = 6
 def calculate_average_share_price_change_for_given_companies_in_given_period(companies_tickers, start_date, end_date):
     sum_of_changes = 0.0
     for company in companies_tickers:
-        share_prices_table = retrieve_share_prices_per_period(company, start_date, end_date)
-        first_day_price, last_day_price = share_prices_table[0][0], share_prices_table[0][-1]
+        first_day_price = retrieve_share_price_daily(company, start_date)
+        last_day_price = retrieve_share_price_daily(company, end_date)
         sum_of_changes += calculate_change_in_share_price(first_day_price, last_day_price)
     return sum_of_changes / len(companies_tickers)
 
@@ -27,8 +27,8 @@ def calculate_investment_value_change(companies_tickers_with_weights, start_date
     change_in_invested_money = 0.0
     sum_of_all_bets = sum(abs(weight) for _, weight in companies_tickers_with_weights)
     for ticker, company_bet_weight in companies_tickers_with_weights:
-        share_prices_table = retrieve_share_prices_per_period(ticker, start_date, end_date)
-        first_day_price, last_day_price = share_prices_table[0][0], share_prices_table[0][-1]
+        first_day_price = retrieve_share_price_daily(ticker, start_date)
+        last_day_price = retrieve_share_price_daily(ticker, end_date)
         change_in_invested_money += calculate_change_in_share_price(first_day_price, last_day_price) * company_bet_weight / sum_of_all_bets
     return change_in_invested_money
 
@@ -106,6 +106,7 @@ class TestCalculateChangeInSharePrice(unittest.TestCase):
 
 class TestCalculateAverageSharePriceChange(unittest.TestCase):
 
+    # Todo: test outdated
     @patch('simulation_logic.calculation_utils.retrieve_share_prices_per_period')
     def test_average_price_increase(self, mock_fetch_prices):
         # Mock data: Prices increase for both companies
@@ -117,6 +118,7 @@ class TestCalculateAverageSharePriceChange(unittest.TestCase):
         average_change = calculate_average_share_price_change_for_given_companies_in_given_period(companies, '2021-01-01', '2021-01-31')
         self.assertAlmostEqual(average_change, 0.15, places=2) # Expecting 15% average increase
 
+    # Todo: test outdated
     @patch('simulation_logic.calculation_utils.retrieve_share_prices_per_period')
     def test_average_price_no_change(self, mock_fetch_prices):
         # Mock data: No price change for both companies
