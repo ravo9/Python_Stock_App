@@ -18,37 +18,34 @@ def run_simulation(companies, start_date, end_date, period_length_in_days, numbe
 def _perform_simulation_logic(companies, start_date, end_date, period_length_in_days, number_of_reports_for_calculation, original_money = 1000):
     sub_period_dates = split_whole_period_into_chunks(start_date, end_date, period_length_in_days)
     money = original_money
-
-    start_time = time.time()
-
     for index, (sub_period_start_date, sub_period_end_date) in enumerate(sub_period_dates):
         _display_progress(index + 1, len(sub_period_dates), money)
         sub_period_weights = calculate_weights(companies, sub_period_start_date, number_of_reports_for_calculation)
-        # if index != 0:
-        #     sub_period_weights = modify_weights(sub_period_weights, start_date, sub_period_end_date, period_length_in_days, number_of_reports_for_calculation)
+
+        sub_period_weights = modify_weights(index, sub_period_weights, start_date, sub_period_end_date, period_length_in_days, number_of_reports_for_calculation)
+
         investment_change = calculate_investment_value_change(sub_period_weights, sub_period_start_date, sub_period_end_date)
         money *= (1 + investment_change)
-
-    execution_time = time.time() - start_time
-    print("Execution time:", execution_time, "seconds")
-
     return (money - original_money)/ original_money
-
-def modify_weights(sub_period_weights, start_date, end_date, period_length_in_days, number_of_reports_for_calculation):
-    modified_weights = []
-    for ticker, weight in sub_period_weights:
-        average_value_this_company_is_traded_per_one_dollar = calculate_average_market_value_per_dollar([ticker], start_date, end_date, period_length_in_days, number_of_reports_for_calculation)
-        modified_weight = float(weight)/float(average_value_this_company_is_traded_per_one_dollar)
-        modified_weight -= float(1)
-        modified_weights.append((ticker, float(modified_weight)))
-    return modified_weights
+ 
+# Todo: play around with this
+def modify_weights(index, sub_period_weights, start_date, end_date, period_length_in_days, number_of_reports_for_calculation):
+    if index != 0:
+        modified_weights = []
+        for ticker, weight in sub_period_weights:
+            average_value_this_company_is_traded_per_one_dollar = calculate_average_market_value_per_dollar([ticker], start_date, end_date, period_length_in_days, number_of_reports_for_calculation)
+            modified_weight = float(weight)/float(average_value_this_company_is_traded_per_one_dollar)
+            modified_weight -= float(1)
+            modified_weights.append((ticker, float(modified_weight)))
+        return modified_weights
+    else: return sub_period_weights
 
 def calculate_average_market_value_per_dollar(companies, start_date, end_date, period_length_in_days, number_of_reports_for_calculation):
     sub_period_dates = split_whole_period_into_chunks(start_date, end_date, period_length_in_days)
     average_value_per_dollar_spent_across_sub_periods = 0.0
     acc = 1
     for sub_period_start_date, sub_period_end_date in sub_period_dates:
-        _display_progress(acc, len(sub_period_dates))
+        # _display_progress(acc, len(sub_period_dates)) # Todo: fix
         acc += 1
         sub_period_weights = calculate_weights(companies, sub_period_start_date, number_of_reports_for_calculation)
 
@@ -72,3 +69,11 @@ def _present_simulation_results(money_invested_equally, money_invested_according
     print("SIMULATION: PERIOD: " + str(period_length_in_days) + " DAYS; REPORTS NUMBER: " + str(number_of_reports_for_calculation))
     print("MONEY INVESTED IN GIVEN COMPANIES EQUALLY (AVERAGE): " + "{0:.2%}".format(money_invested_equally))
     print("MONEY INVESTED IN GIVEN COMPANIES USING TESTED STRATEGY: " + "{0:.2%}".format(money_invested_according_to_strategy))
+
+start_time = None
+def measureTime(command):
+    global start_time
+    if (command == "START"): start_time = time.time()
+    if (command == "STOP"):
+        execution_time = time.time() - start_time
+        print("Execution time:", execution_time, "seconds")

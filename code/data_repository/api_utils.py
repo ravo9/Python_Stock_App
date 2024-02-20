@@ -53,7 +53,4 @@ def fetch_total_amount_of_shares_on_particular_day(company, date):
             date -= timedelta(weeks=1)
     return None
 
-def findSplits(company, data):
-    print("SPLITS FOUND:")
-    print(company)
-    print(data.get_splits())
+def findSplits(company, data): print("SPLITS FOUND: " + company + str(data.get_splits()))

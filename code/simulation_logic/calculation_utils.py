@@ -8,13 +8,10 @@ sys.path.insert(0, parent_dir)
 from data_repository.data_repository import retrieve_financial_statements, retrieve_share_price_daily, retrieve_total_amount_of_shares_on_particular_day
 
 ATTRIBUTE_OF_DECISION_INDEX = 2
+NUMBER_OF_REPORTS_TO_FETCH_FROM_API = 6 # Not used at the moment
 
 calculate_change_in_share_price = lambda first_day_price, last_day_price: (last_day_price - first_day_price)/first_day_price
 
-# Not used at the moment
-NUMBER_OF_REPORTS_TO_FETCH_FROM_API = 6
-
-# If we check difference between 01.01.23 and 0.1.01.24, and the last day is not available - then it will actually check 01.01.23 - 29.12.23.
 def calculate_average_share_price_change_for_given_companies_in_given_period(companies_tickers, start_date, end_date):
     sum_of_changes = 0.0
     for company in companies_tickers:
@@ -34,6 +31,11 @@ def calculate_investment_value_change(companies_tickers_with_weights, start_date
 
 def calculate_weights(companies, date, number_of_reports_for_calculation):
     calculated_weights = []
+
+    # Analysis stuff
+    # output = str(date)
+    # output_headers = "companies: "
+
     for ticker in companies:
         all_shares_amount  = retrieve_total_amount_of_shares_on_particular_day(ticker, date)
         share_price_for_this_date = retrieve_share_price_daily(ticker, date)
@@ -41,6 +43,13 @@ def calculate_weights(companies, date, number_of_reports_for_calculation):
         # average_real_value_over_analysed_reports = calculate_value_by_intrinsic_value(ticker, date, number_of_reports_for_calculation, 5)
         value_per_dollar_spent = average_real_value_over_analysed_reports / all_shares_amount / share_price_for_this_date
         calculated_weights.append((ticker, value_per_dollar_spent))
+        # Analysis stuff
+        # output += " " + str(value_per_dollar_spent)
+        # output_headers += " " + ticker
+
+    # Analysis stuff
+    # print(output_headers)
+    # print(output)
     return calculated_weights
 
 def find_out_value_per_dollar_spent_today(companies, date, number_of_reports_in_calculations):

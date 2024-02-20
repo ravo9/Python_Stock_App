@@ -14,6 +14,7 @@ def split_whole_period_into_chunks(start_date, end_date, sub_period_in_days, dat
 
     # Iterate over the full period in chunks of sub_period_in_days
     while sub_period_start_datetime < full_period_end_datetime:
+
         # Adjust the end date for the last sub-period
         if sub_period_end_datetime > full_period_end_datetime:
             sub_period_end_datetime = full_period_end_datetime
@@ -31,5 +32,5 @@ def split_whole_period_into_chunks(start_date, end_date, sub_period_in_days, dat
 
     return sub_period_dates
 
-def strpTime(date, date_format):
-    return datetime.datetime.strptime(date, date_format)
+# Todo: Test syntax
+def strpTime(date, date_format): return datetime.datetime.strptime(date, date_format)
