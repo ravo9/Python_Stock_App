@@ -22,7 +22,7 @@ def _perform_simulation_logic(companies, start_date, end_date, period_length_in_
         _display_progress(index + 1, len(sub_period_dates), money)
         sub_period_weights = calculate_weights(companies, sub_period_start_date, number_of_reports_for_calculation)
 
-        sub_period_weights = modify_weights(index, sub_period_weights, start_date, sub_period_end_date, period_length_in_days, number_of_reports_for_calculation)
+        # sub_period_weights = modify_weights(index, sub_period_weights, start_date, sub_period_end_date, period_length_in_days, number_of_reports_for_calculation)
 
         investment_change = calculate_investment_value_change(sub_period_weights, sub_period_start_date, sub_period_end_date)
         money *= (1 + investment_change)
