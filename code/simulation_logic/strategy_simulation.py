@@ -15,17 +15,28 @@ def run_simulation(companies, start_date, end_date, period_length_in_days, numbe
     _present_simulation_results(change_in_value_of_money_invested_equally, change_in_value_of_money_invested_by_using_tested_strategy, period_length_in_days, number_of_reports_for_calculation)
     return change_in_value_of_money_invested_by_using_tested_strategy # Used by otimisation.
 
+import csv
+def save_to_csv(data, file_path="../exported.csv"):
+    with open(file_path, 'w', newline='') as file:
+        writer = csv.writer(file)
+        writer.writerows(data)
+    print(f"Data has been successfully saved to '{file_path}'.")
+
 def _perform_simulation_logic(companies, start_date, end_date, period_length_in_days, number_of_reports_for_calculation, original_money = 1000):
     sub_period_dates = split_whole_period_into_chunks(start_date, end_date, period_length_in_days)
     money = original_money
+    # Google Sheets Analysis
+    table_data = [['Company'] + [company for company in companies]]
     for index, (sub_period_start_date, sub_period_end_date) in enumerate(sub_period_dates):
         _display_progress(index + 1, len(sub_period_dates), money)
         sub_period_weights = calculate_weights(companies, sub_period_start_date, number_of_reports_for_calculation)
-
+        # Google Sheets Analysis
+        table_data.append([sub_period_start_date] + [value for _, value in sub_period_weights])
         # sub_period_weights = modify_weights(index, sub_period_weights, start_date, sub_period_end_date, period_length_in_days, number_of_reports_for_calculation)
-
         investment_change = calculate_investment_value_change(sub_period_weights, sub_period_start_date, sub_period_end_date)
         money *= (1 + investment_change)
+    # Google Sheets Analysis
+    save_to_csv(table_data)
     return (money - original_money)/ original_money
  
 # Todo: play around with this
@@ -34,33 +45,31 @@ def modify_weights(index, sub_period_weights, start_date, end_date, period_lengt
         modified_weights = []
         for ticker, weight in sub_period_weights:
             average_value_this_company_is_traded_per_one_dollar = calculate_average_market_value_per_dollar([ticker], start_date, end_date, period_length_in_days, number_of_reports_for_calculation)
-            modified_weight = float(weight)/float(average_value_this_company_is_traded_per_one_dollar)
-            modified_weight -= float(1)
-            modified_weights.append((ticker, float(modified_weight)))
+            modified_weight = weight/average_value_this_company_is_traded_per_one_dollar # Is it correct?
+            modified_weights.append((ticker, modified_weight))
         return modified_weights
     else: return sub_period_weights
 
 def calculate_average_market_value_per_dollar(companies, start_date, end_date, period_length_in_days, number_of_reports_for_calculation):
     sub_period_dates = split_whole_period_into_chunks(start_date, end_date, period_length_in_days)
     average_value_per_dollar_spent_across_sub_periods = 0.0
-    acc = 1
+    # acc = 1
     for sub_period_start_date, sub_period_end_date in sub_period_dates:
         # _display_progress(acc, len(sub_period_dates)) # Todo: fix
-        acc += 1
+        # acc += 1
         sub_period_weights = calculate_weights(companies, sub_period_start_date, number_of_reports_for_calculation)
-
-        print(sub_period_start_date)
-
-        for ticker, value_per_dollar_spent in sub_period_weights:
+        # Todo: Duplication with "Google Sheets Analysis"
+        # print(sub_period_start_date)
+        # for ticker, value_per_dollar_spent in sub_period_weights:
             # print(f"Average value per dollar spent for {ticker} on {sub_period_start_date} : {value_per_dollar_spent}")
-            print(value_per_dollar_spent)
+            # print(value_per_dollar_spent)
         average_value = sum(value for ticker, value in sub_period_weights) / len(sub_period_weights)
-        if sub_period_weights:
+        # if sub_period_weights:
             # print(f"Average value per dollar spent for given companies on {sub_period_start_date} : {average_value}\n")
-            print(average_value)
-            print("\n")
+            # print(average_value)
+            # print("\n")
         average_value_per_dollar_spent_across_sub_periods += average_value
-    print("AVERAGE VALUE PER DOLLAR SPENT ACROSS WHOLE PERIOD: " + str(average_value_per_dollar_spent_across_sub_periods/len(sub_period_dates)))
+    # print("AVERAGE VALUE PER DOLLAR SPENT ACROSS WHOLE PERIOD: " + str(average_value_per_dollar_spent_across_sub_periods/len(sub_period_dates)))
     return average_value_per_dollar_spent_across_sub_periods/len(sub_period_dates)
 
 def _display_progress(acc, total_length, money): print(f"{((acc/total_length) * 100):.2f}%" + " " + str(money), end='\r')

@@ -31,11 +31,6 @@ def calculate_investment_value_change(companies_tickers_with_weights, start_date
 
 def calculate_weights(companies, date, number_of_reports_for_calculation):
     calculated_weights = []
-
-    # Analysis stuff
-    # output = str(date)
-    # output_headers = "companies: "
-
     for ticker in companies:
         all_shares_amount  = retrieve_total_amount_of_shares_on_particular_day(ticker, date)
         share_price_for_this_date = retrieve_share_price_daily(ticker, date)
@@ -43,13 +38,6 @@ def calculate_weights(companies, date, number_of_reports_for_calculation):
         # average_real_value_over_analysed_reports = calculate_value_by_intrinsic_value(ticker, date, number_of_reports_for_calculation, 5)
         value_per_dollar_spent = average_real_value_over_analysed_reports / all_shares_amount / share_price_for_this_date
         calculated_weights.append((ticker, value_per_dollar_spent))
-        # Analysis stuff
-        # output += " " + str(value_per_dollar_spent)
-        # output_headers += " " + ticker
-
-    # Analysis stuff
-    # print(output_headers)
-    # print(output)
     return calculated_weights
 
 def find_out_value_per_dollar_spent_today(companies, date, number_of_reports_in_calculations):
