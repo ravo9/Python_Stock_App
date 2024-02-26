@@ -5,6 +5,7 @@ from unittest.mock import patch
 current_dir = os.path.dirname(os.path.abspath(__file__))
 parent_dir = os.path.dirname(current_dir)
 sys.path.insert(0, parent_dir)
+from .date_utils import split_whole_period_into_chunks
 from data_repository.data_repository import retrieve_financial_statements, retrieve_share_price_daily, retrieve_total_amount_of_shares_on_particular_day
 
 ATTRIBUTE_OF_DECISION_INDEX = 2
@@ -40,6 +41,39 @@ def calculate_weights(companies, date, number_of_reports_for_calculation):
         calculated_weights.append((ticker, value_per_dollar_spent))
     return calculated_weights
 
+# Todo: play around with this
+def modify_weights(index, sub_period_weights, start_date, end_date, period_length_in_days, number_of_reports_for_calculation):
+    if index != 0:
+        modified_weights = []
+        for ticker, weight in sub_period_weights:
+            average_value_this_company_is_traded_per_one_dollar = calculate_average_market_value_per_dollar([ticker], start_date, end_date, period_length_in_days, number_of_reports_for_calculation)
+            modified_weight = weight/average_value_this_company_is_traded_per_one_dollar # Is it correct?
+            modified_weights.append((ticker, modified_weight))
+        return modified_weights
+    else: return sub_period_weights
+
+def calculate_average_market_value_per_dollar(companies, start_date, end_date, period_length_in_days, number_of_reports_for_calculation):
+    sub_period_dates = split_whole_period_into_chunks(start_date, end_date, period_length_in_days)
+    average_value_per_dollar_spent_across_sub_periods = 0.0
+    # acc = 1
+    for sub_period_start_date, sub_period_end_date in sub_period_dates:
+        # _display_progress(acc, len(sub_period_dates)) # Todo: fix
+        # acc += 1
+        sub_period_weights = calculate_weights(companies, sub_period_start_date, number_of_reports_for_calculation)
+        # Todo: Duplication with "Google Sheets Analysis"
+        # print(sub_period_start_date)
+        # for ticker, value_per_dollar_spent in sub_period_weights:
+            # print(f"Average value per dollar spent for {ticker} on {sub_period_start_date} : {value_per_dollar_spent}")
+            # print(value_per_dollar_spent)
+        average_value = sum(value for ticker, value in sub_period_weights) / len(sub_period_weights)
+        # if sub_period_weights:
+            # print(f"Average value per dollar spent for given companies on {sub_period_start_date} : {average_value}\n")
+            # print(average_value)
+            # print("\n")
+        average_value_per_dollar_spent_across_sub_periods += average_value
+    # print("AVERAGE VALUE PER DOLLAR SPENT ACROSS WHOLE PERIOD: " + str(average_value_per_dollar_spent_across_sub_periods/len(sub_period_dates)))
+    return average_value_per_dollar_spent_across_sub_periods/len(sub_period_dates)
+
 def find_out_value_per_dollar_spent_today(companies, date, number_of_reports_in_calculations):
     for item in sorted(calculate_weights(companies, date, number_of_reports_in_calculations), key=lambda x: x[1], reverse=True): print(item)
 
@@ -51,9 +85,9 @@ def calculate_value_by_intrinsic_value(ticker, date, num_periods, projection_yea
     cash_flow_statements = retrieve_financial_statements("cash_flow_statement", num_periods, NUMBER_OF_REPORTS_TO_FETCH_FROM_API, ticker, date)
     income_statements = retrieve_financial_statements("income_statement", num_periods, NUMBER_OF_REPORTS_TO_FETCH_FROM_API, ticker, date)
     balance_sheets = retrieve_financial_statements("balance_sheet", num_periods, NUMBER_OF_REPORTS_TO_FETCH_FROM_API, ticker, date)
-    average_fcf = calculate_average_free_cash_flow(cash_flow_statements, num_periods)
-    growth_rate = calculate_growth_rate(cash_flow_statements)
-    discount_rate = calculate_discount_rate(income_statements, balance_sheets, num_periods)
+    average_fcf = _calculate_average_free_cash_flow(cash_flow_statements, num_periods)
+    growth_rate = _calculate_growth_rate(cash_flow_statements)
+    discount_rate = _calculate_discount_rate(income_statements, balance_sheets, num_periods)
     present_value_fcf = 0
     for year in range(1, projection_years + 1):
         future_fcf = average_fcf * (1 + growth_rate) ** year
@@ -61,17 +95,17 @@ def calculate_value_by_intrinsic_value(ticker, date, num_periods, projection_yea
         present_value_fcf += discounted_fcf
     return float(present_value_fcf)
 
-def calculate_average_free_cash_flow(cash_flow_statements, num_years):
+def _calculate_average_free_cash_flow(cash_flow_statements, num_years):
     free_cash_flows_only = [row[ATTRIBUTE_OF_DECISION_INDEX] for row in cash_flow_statements]
     if len(free_cash_flows_only) < num_years: return "Insufficient data"
     return sum(free_cash_flows_only[-num_years:]) / num_years
 
-def calculate_growth_rate(cash_flow_statements):
+def _calculate_growth_rate(cash_flow_statements):
     fcf_values = [row[ATTRIBUTE_OF_DECISION_INDEX] for row in cash_flow_statements]
     if not fcf_values or len(fcf_values) == 0: print("No FCF data provided")
     return sum(fcf_values) / len(fcf_values)
 
-def calculate_discount_rate(income_statements, balance_sheets, num_years):
+def _calculate_discount_rate(income_statements, balance_sheets, num_years):
     # "Cost of debt" is interest_expense / total_debt - our simplified discount rate.
     if not income_statements or len(income_statements) == 0: print("No Income Statements provided")
     if not balance_sheets or len(balance_sheets) == 0: print("No Balance Sheets provided")
