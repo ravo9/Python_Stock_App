@@ -123,3 +123,4 @@ cython_debug/
 # Project - specific:
 database.db
 code/profile_stats
+exported.csv
