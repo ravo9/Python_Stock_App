@@ -8,10 +8,13 @@ def run_multiple_simulations(companies, start_date, end_date, SUB_PERIOD_LENGTH_
             run_simulation(companies, start_date, end_date, sub_period_length, number_of_reports_for_calculation)
 
 def run_simulation(companies, start_date, end_date, period_length_in_days, number_of_reports_for_calculation):
+    
     # Get back in time. Invest given money (e.g. $100) in given companies equally ($100 each) - tested manually on paper.
     change_in_value_of_money_invested_equally = calculate_average_share_price_change_for_given_companies_in_given_period(companies, start_date, end_date)
+    
     # Get back in time. Invest given money given companies not equally, but accordingly to the tested strategy (expressed by bets/ weights values).
     change_in_value_of_money_invested_by_using_tested_strategy = _perform_simulation_logic(companies, start_date, end_date, period_length_in_days, number_of_reports_for_calculation)
+    
     _present_simulation_results(change_in_value_of_money_invested_equally, change_in_value_of_money_invested_by_using_tested_strategy, period_length_in_days, number_of_reports_for_calculation)
     return change_in_value_of_money_invested_by_using_tested_strategy # Used by otimisation.
 
