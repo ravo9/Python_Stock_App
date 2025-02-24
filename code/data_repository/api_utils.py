@@ -29,7 +29,7 @@ def fetch_financial_statements(statement_type, ticker, number_of_reports_for_cal
 
 def fetch_share_price_daily(company, date, date_format = "%Y-%m-%d"):
     for _ in range(5):
-        # with open(os.devnull, 'w') as devnull, contextlib.redirect_stdout(devnull), contextlib.redirect_stderr(devnull): # Mutes yfinance exceptions that are already handled.
+        with open(os.devnull, 'w') as devnull, contextlib.redirect_stdout(devnull), contextlib.redirect_stderr(devnull): # Mutes yfinance exceptions that are already handled.
             share_prices_table = yf.download(company, start=date, end=(datetime.strptime(date, date_format) + timedelta(days=1)), progress=False)
             if not share_prices_table.empty:
                 share_price = _turn_price_table_into_average_price(share_prices_table)[0][0]
