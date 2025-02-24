@@ -29,16 +29,16 @@ def fetch_financial_statements(statement_type, ticker, number_of_reports_for_cal
 
 def fetch_share_price_daily(company, date, date_format = "%Y-%m-%d"):
     for _ in range(5):
-        with open(os.devnull, 'w') as devnull, contextlib.redirect_stdout(devnull), contextlib.redirect_stderr(devnull): # Mutes yfinance exceptions that are already handled.
+        # with open(os.devnull, 'w') as devnull, contextlib.redirect_stdout(devnull), contextlib.redirect_stderr(devnull): # Mutes yfinance exceptions that are already handled.
             share_prices_table = yf.download(company, start=date, end=(datetime.strptime(date, date_format) + timedelta(days=1)), progress=False)
             if not share_prices_table.empty:
-                share_price = _turn_price_table_into_average_price(share_prices_table)[0]
+                share_price = _turn_price_table_into_average_price(share_prices_table)[0][0]
                 save_data_to_database(SQL_CREATE_SHARE_PRICE, SQL_INSERT_SHARE_PRICE, float(share_price), company, date) # Caching
                 return share_price
             date = (datetime.strptime(date, date_format) - timedelta(days=1)).strftime(date_format)
     raise ValueError("No data available for the specified date after 5 attempts.")
 
-def _turn_price_table_into_average_price(share_prices_table): return ((share_prices_table["High"] + share_prices_table["Low"]) / 2).tolist()
+def _turn_price_table_into_average_price(share_prices_table): return ((share_prices_table["High"] + share_prices_table["Low"]) / 2).values.tolist()
 
 def fetch_total_amount_of_shares_on_particular_day(company, date):
     for attempt in range(3):

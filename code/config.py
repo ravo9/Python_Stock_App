@@ -54,11 +54,11 @@
 #     # 'MCK', # last split 1998
 # ]
 
-COMPANIES_SET = ['XOM', 'UNH', 'CVS', 'MCK', 'CVX']
+COMPANIES_SET = ['DIS', 'MSFT', 'NFLX']
 START_DATE = '2023-01-01'
 END_DATE = '2024-01-01'
 SUB_PERIOD_LENGTH_IN_DAYS_ARRAY = [130]
-NUMBER_OF_REPORTS_TAKEN_FOR_CALCULATION_ARRAY = [6]
+NUMBER_OF_REPORTS_TAKEN_FOR_CALCULATION_ARRAY = [4]
 
 # * By Tested it means that it has enough reports on the server, and didn't have split in tested period (01.01.22 - 01.01.24).
 # Problem: splits (they're not taken into account by share price and amount of shares in the same way).
