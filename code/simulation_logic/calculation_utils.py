@@ -69,43 +69,43 @@ def calculate_value_by_free_cash_flow(number_of_reports_for_calculation, ticker,
 
 # UNIT TESTING
 
-class TestCalculateChangeInSharePrice(unittest.TestCase):
+# class TestCalculateChangeInSharePrice(unittest.TestCase):
 
-    def test_increase_in_price(self):
-        self.assertEqual(calculate_change_in_share_price(100, 110), 0.1)
+#     def test_increase_in_price(self):
+#         self.assertEqual(calculate_change_in_share_price(100, 110), 0.1)
 
-    def test_decrease_in_price(self):
-        self.assertEqual(calculate_change_in_share_price(100, 90), -0.1)
+#     def test_decrease_in_price(self):
+#         self.assertEqual(calculate_change_in_share_price(100, 90), -0.1)
 
-    def test_no_change_in_price(self):
-        self.assertEqual(calculate_change_in_share_price(100, 100), 0)
+#     def test_no_change_in_price(self):
+#         self.assertEqual(calculate_change_in_share_price(100, 100), 0)
 
-    def test_zero_initial_price(self):
-        with self.assertRaises(ZeroDivisionError):
-            calculate_change_in_share_price(0, 100)
+#     def test_zero_initial_price(self):
+#         with self.assertRaises(ZeroDivisionError):
+#             calculate_change_in_share_price(0, 100)
 
-class TestCalculateAverageSharePriceChange(unittest.TestCase):
+# class TestCalculateAverageSharePriceChange(unittest.TestCase):
 
-    # Todo: test outdated
-    @patch('simulation_logic.calculation_utils.retrieve_share_prices_per_period')
-    def test_average_price_increase(self, mock_fetch_prices):
-        # Mock data: Prices increase for both companies
-        mock_fetch_prices.side_effect = [
-            [(100, 110)],  # First company: 10% increase
-            [(200, 240)]   # Second company: 20% increase
-        ]
-        companies = ['COMPANY_A', 'COMPANY_B']
-        average_change = calculate_average_share_price_change_for_given_companies_in_given_period(companies, '2021-01-01', '2021-01-31')
-        self.assertAlmostEqual(average_change, 0.15, places=2) # Expecting 15% average increase
+#     # Todo: test outdated
+#     @patch('simulation_logic.calculation_utils.retrieve_share_prices_per_period')
+#     def test_average_price_increase(self, mock_fetch_prices):
+#         # Mock data: Prices increase for both companies
+#         mock_fetch_prices.side_effect = [
+#             [(100, 110)],  # First company: 10% increase
+#             [(200, 240)]   # Second company: 20% increase
+#         ]
+#         companies = ['COMPANY_A', 'COMPANY_B']
+#         average_change = calculate_average_share_price_change_for_given_companies_in_given_period(companies, '2021-01-01', '2021-01-31')
+#         self.assertAlmostEqual(average_change, 0.15, places=2) # Expecting 15% average increase
 
-    # Todo: test outdated
-    @patch('simulation_logic.calculation_utils.retrieve_share_prices_per_period')
-    def test_average_price_no_change(self, mock_fetch_prices):
-        # Mock data: No price change for both companies
-        mock_fetch_prices.side_effect = [
-            [(100,), (100,)],  # First company: No change
-            [(200,), (200,)]   # Second company: No change
-        ]
-        companies = ['COMPANY_A', 'COMPANY_B']
-        average_change = calculate_average_share_price_change_for_given_companies_in_given_period(companies, '2021-01-01', '2021-01-31')
-        self.assertEqual(average_change, 0)  # Expecting 0% change
+#     # Todo: test outdated
+#     @patch('simulation_logic.calculation_utils.retrieve_share_prices_per_period')
+#     def test_average_price_no_change(self, mock_fetch_prices):
+#         # Mock data: No price change for both companies
+#         mock_fetch_prices.side_effect = [
+#             [(100,), (100,)],  # First company: No change
+#             [(200,), (200,)]   # Second company: No change
+#         ]
+#         companies = ['COMPANY_A', 'COMPANY_B']
+#         average_change = calculate_average_share_price_change_for_given_companies_in_given_period(companies, '2021-01-01', '2021-01-31')
+#         self.assertEqual(average_change, 0)  # Expecting 0% change

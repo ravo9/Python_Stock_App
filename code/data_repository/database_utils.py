@@ -66,7 +66,6 @@ def get_stored_financial_statements_raw(statement_type, ticker, date, number_of_
     with sl.connect(DATABASE_PATH) as con:
         return con.execute(sql_query, (ticker, date, number_of_reports_for_calculations)).fetchall()
 
-# Todo: does it work with [0][0] in all cases?
 def get_stored_value_if_available(query, *params):
     with sl.connect(DATABASE_PATH) as con:
         try: stored_value = con.execute(query, params).fetchall()

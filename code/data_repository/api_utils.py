@@ -33,7 +33,7 @@ def fetch_share_price_daily(company, date, date_format = "%Y-%m-%d"):
             share_prices_table = yf.download(company, start=date, end=(datetime.strptime(date, date_format) + timedelta(days=1)), progress=False)
             if not share_prices_table.empty:
                 share_price = _turn_price_table_into_average_price(share_prices_table)[0][0]
-                save_data_to_database(SQL_CREATE_SHARE_PRICE, SQL_INSERT_SHARE_PRICE, float(share_price), company, date) # Caching
+                save_data_to_database(SQL_CREATE_SHARE_PRICE, SQL_INSERT_SHARE_PRICE, company, date, float(share_price)) # Caching
                 return share_price
             date = (datetime.strptime(date, date_format) - timedelta(days=1)).strftime(date_format)
     raise ValueError("No data available for the specified date after 5 attempts.")
@@ -46,7 +46,7 @@ def fetch_total_amount_of_shares_on_particular_day(company, date):
             data = yf.Ticker(company)
             value = data.get_shares_full(start=date)[0] # Throws exception if no data found
             # findSplits(company, data)
-            save_data_to_database(SQL_CREATE_SHARES_AMOUNT, SQL_INSERT_SHARES_AMOUNT, int(value), company, date) # Caching
+            save_data_to_database(SQL_CREATE_SHARES_AMOUNT, SQL_INSERT_SHARES_AMOUNT, company, date, int(value)) # Caching
             return value
         except Exception as e:
             print(f"No data returned for company {company} on {date} attempt {attempt + 1} {e}")
