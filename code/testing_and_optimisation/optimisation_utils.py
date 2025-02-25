@@ -17,7 +17,6 @@ def objective_function(x, *args):
     print("Optimized Parameters:", optimized_params)
     result = tested_function(companies_set, start_date, end_date, *optimized_params)
     print("Objective Function Result:", result)
-    # Your objective function calculation (assuming result is a scalar value)
     return -result
 
 def find_optimal_parameters(tested_function, arg1_values, arg2_values):
@@ -33,3 +32,11 @@ def find_optimal_parameters(tested_function, arg1_values, arg2_values):
     print("Best period_length_in_days:", best_period_length_in_days)
     print("Best number_of_reports_for_calculation:", best_number_of_reports_for_calculation)
     print("Best Result:", best_result)
+
+start_time = None
+def _measureTime(command):
+    global start_time
+    if (command == "START"): start_time = time.time()
+    if (command == "STOP"):
+        execution_time = time.time() - start_time
+        print("Execution time:", execution_time, "seconds")

@@ -43,29 +43,28 @@ def calculate_weights(companies, date, number_of_reports_for_calculation):
         calculated_weights.append((ticker, value_per_dollar_spent))
     return calculated_weights
 
-# Todo: play around with this
-def modify_weights(index, sub_period_weights, start_date, end_date, period_length_in_days, number_of_reports_for_calculation):
-    if index != 0:
-        modified_weights = []
-        for ticker, weight in sub_period_weights:
-            average_value_this_company_is_traded_per_one_dollar = _calculate_average_market_value_per_dollar([ticker], start_date, end_date, period_length_in_days, number_of_reports_for_calculation)
-            modified_weight = weight/average_value_this_company_is_traded_per_one_dollar # Is it correct?
-            modified_weights.append((ticker, modified_weight))
-        return modified_weights
-    else: return sub_period_weights
-
-def _calculate_average_market_value_per_dollar(companies, start_date, end_date, period_length_in_days, number_of_reports_for_calculation):
-    sub_period_dates = split_whole_period_into_chunks(start_date, end_date, period_length_in_days)
-    average_value_per_dollar_spent_across_sub_periods = 0.0
-    for sub_period_start_date, sub_period_end_date in sub_period_dates:
-        sub_period_weights = calculate_weights(companies, sub_period_start_date, number_of_reports_for_calculation)
-        average_value = sum(value for ticker, value in sub_period_weights) / len(sub_period_weights)
-        average_value_per_dollar_spent_across_sub_periods += average_value
-    return average_value_per_dollar_spent_across_sub_periods/len(sub_period_dates)
-
 def calculate_value_by_free_cash_flow(number_of_reports_for_calculation, ticker, date):
     cash_flow_statements = retrieve_financial_statements("cash_flow_statement", number_of_reports_for_calculation, NUMBER_OF_REPORTS_TO_FETCH_FROM_API, ticker, date)
     return sum(report[ATTRIBUTE_OF_DECISION_INDEX] for report in cash_flow_statements) / len(cash_flow_statements)
+
+# def calculate_weights_modified(index, sub_period_weights, start_date, end_date, period_length_in_days, number_of_reports_for_calculation):
+#     if index != 0:
+#         modified_weights = []
+#         for ticker, weight in sub_period_weights:
+#             average_value_this_company_is_traded_per_one_dollar = _calculate_average_market_value_per_dollar([ticker], start_date, end_date, period_length_in_days, number_of_reports_for_calculation)
+#             modified_weight = weight/average_value_this_company_is_traded_per_one_dollar # Is it correct?
+#             modified_weights.append((ticker, modified_weight))
+#         return modified_weights
+#     else: return sub_period_weights
+
+# def _calculate_average_market_value_per_dollar(companies, start_date, end_date, period_length_in_days, number_of_reports_for_calculation):
+#     sub_period_dates = split_whole_period_into_chunks(start_date, end_date, period_length_in_days)
+#     average_value_per_dollar_spent_across_sub_periods = 0.0
+#     for sub_period_start_date, sub_period_end_date in sub_period_dates:
+#         sub_period_weights = calculate_weights(companies, sub_period_start_date, number_of_reports_for_calculation)
+#         average_value = sum(value for ticker, value in sub_period_weights) / len(sub_period_weights)
+#         average_value_per_dollar_spent_across_sub_periods += average_value
+#     return average_value_per_dollar_spent_across_sub_periods/len(sub_period_dates)
 
 # UNIT TESTING
 
@@ -86,7 +85,6 @@ def calculate_value_by_free_cash_flow(number_of_reports_for_calculation, ticker,
 
 # class TestCalculateAverageSharePriceChange(unittest.TestCase):
 
-#     # Todo: test outdated
 #     @patch('simulation_logic.calculation_utils.retrieve_share_prices_per_period')
 #     def test_average_price_increase(self, mock_fetch_prices):
 #         # Mock data: Prices increase for both companies
@@ -98,7 +96,6 @@ def calculate_value_by_free_cash_flow(number_of_reports_for_calculation, ticker,
 #         average_change = calculate_average_share_price_change_for_given_companies_in_given_period(companies, '2021-01-01', '2021-01-31')
 #         self.assertAlmostEqual(average_change, 0.15, places=2) # Expecting 15% average increase
 
-#     # Todo: test outdated
 #     @patch('simulation_logic.calculation_utils.retrieve_share_prices_per_period')
 #     def test_average_price_no_change(self, mock_fetch_prices):
 #         # Mock data: No price change for both companies

@@ -1,0 +1,39 @@
+# Test Scenario 1
+# average: 15.06%
+# my best result: 16.75%
+# best setting: 20 days; 10 reports; strategy freeCashFlow
+# COMPANIES_SET = ['MSFT', 'NFLX', 'VZ', 'KO', 'MCD', 'JNJ', 'SBUX', 'DIS', 'ORCL', 'O', 'JPM']
+# START_DATE = '2023-01-01'
+# END_DATE = '2024-01-01'
+# SUB_PERIOD_LENGTH_IN_DAYS_ARRAY = [30, 20]
+# NUMBER_OF_REPORTS_TAKEN_FOR_CALCULATION_ARRAY = [6, 10]
+
+# Test Scenario 2
+# average: -7.89%
+# my best result: 14.36%
+# best setting: 30 days; 6 reports; strategy freeCashFlow
+# COMPANIES_SET = ['MSFT', 'NFLX', 'VZ', 'KO', 'MCD', 'JNJ', 'SBUX', 'DIS', 'ORCL', 'O', 'JPM']
+# START_DATE = '2022-01-01'
+# END_DATE = '2024-01-01'
+# SUB_PERIOD_LENGTH_IN_DAYS_ARRAY = [30, 20]
+# NUMBER_OF_REPORTS_TAKEN_FOR_CALCULATION_ARRAY = [6, 10]
+
+# Test Scenario 3
+# average: 9.83%
+# my best result: 31.26%
+# best setting: 30 days; 6 reports; strategy freeCashFlow
+# COMPANIES_SET = ['MSFT', 'NFLX', 'VZ', 'KO', 'MCD', 'JNJ', 'SBUX', 'DIS', 'ORCL', 'O', 'JPM']
+# START_DATE = '2021-01-01'
+# END_DATE = '2024-01-01'
+# SUB_PERIOD_LENGTH_IN_DAYS_ARRAY = [30, 20]
+# NUMBER_OF_REPORTS_TAKEN_FOR_CALCULATION_ARRAY = [6, 10]
+
+# Test Scenario 4
+# average: 4.64%
+# my best result: 27.37%
+# best setting: 30 days; 6 reports; strategy freeCashFlow
+# COMPANIES_SET = ['MSFT', 'NFLX', 'VZ', 'KO', 'MCD', 'JNJ', 'SBUX', 'DIS', 'ORCL', 'O', 'JPM','WMT', 'XOM', 'UNH', 'CVS', 'MCK', 'CVX']
+# START_DATE = '2022-01-01'
+# END_DATE = '2024-01-01'
+# SUB_PERIOD_LENGTH_IN_DAYS_ARRAY = [30, 20]
+# NUMBER_OF_REPORTS_TAKEN_FOR_CALCULATION_ARRAY = [6, 10]

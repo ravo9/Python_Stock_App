@@ -32,5 +32,4 @@ def split_whole_period_into_chunks(start_date, end_date, sub_period_in_days, dat
 
     return sub_period_dates
 
-# Todo: Test syntax
 def strpTime(date, date_format): return datetime.datetime.strptime(date, date_format)

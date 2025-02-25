@@ -6,9 +6,6 @@ SQL_CREATE_BALANCE_SHEET = '''CREATE TABLE IF NOT EXISTS balance_sheet (company_
 SQL_CREATE_SHARES_AMOUNT = '''CREATE TABLE IF NOT EXISTS SHARES_AMOUNT (ticker TEXT, date TEXT, shares_amount REAL, PRIMARY KEY (ticker, date))'''
 SQL_CREATE_SHARE_PRICE = '''CREATE TABLE IF NOT EXISTS SHARE_PRICE (ticker TEXT, date TEXT, share_price REAL, PRIMARY KEY (ticker, date))'''
 SQL_CREATE_SHARE_PRICES_IN_PERIOD = '''CREATE TABLE IF NOT EXISTS SHARE_PRICES_IN_PERIOD (ticker TEXT, start_date TEXT, end_date TEXT, data TEXT, PRIMARY KEY (ticker, start_date, end_date))'''
-SQL_EXISTING_CASH_FLOW_STATEMENTS = "SELECT * FROM cash_flow_statement WHERE company_name = ?"
-SQL_EXISTING_INCOME_STATEMENTS = "SELECT * FROM income_statement WHERE company_name = ?"
-SQL_EXISTING_BALANCE_SHEETS = "SELECT * FROM balance_sheet WHERE company_name = ?"
 SQL_EXISTING_SHARES_AMOUNT = "SELECT shares_amount FROM SHARES_AMOUNT WHERE ticker = ? AND date = ?"
 SQL_EXISTING_SHARE_PRICE = "SELECT share_price FROM SHARE_PRICE WHERE ticker = ? AND date = ?"
 SQL_EXISTING_SHARE_PRICES_IN_PERIOD = "SELECT data FROM SHARE_PRICES_IN_PERIOD WHERE ticker = ? AND start_date = ? AND end_date = ?"
@@ -41,19 +38,13 @@ def save_data_to_database(init_query, insert_query, *params):
         except Exception as e: print(f"Error in save_data_to_database: {e}")
 
 def get_stored_financial_statements_if_available(statement_type, number_of_reports_for_calculations, number_of_reports_to_fetch, ticker, date):
-    sql_existing_statements = {'cash_flow_statement': SQL_EXISTING_CASH_FLOW_STATEMENTS, 'income_statement': SQL_EXISTING_INCOME_STATEMENTS, 'balance_sheet': SQL_EXISTING_BALANCE_SHEETS}
     sql_recent_statements = {'cash_flow_statement': SQL_MOST_RECENT_CASH_FLOW_STATEMENTS,'income_statement': SQL_MOST_RECENT_INCOME_STATEMENTS, 'balance_sheet': SQL_MOST_RECENT_BALANCE_SHEETS}
     with sl.connect(DATABASE_PATH) as con:
         try:
-            # Todo: I should check if len(are_reports_stored) is longer than number_of_reports_to_fetch, not 0.
-            are_reports_stored = len(con.execute(sql_existing_statements[statement_type], (ticker,)).fetchall()) > 0
-            if are_reports_stored:
-                reports = con.execute(sql_recent_statements[statement_type], (ticker, date, number_of_reports_for_calculations)).fetchall()
-                if not reports: raise ValueError("ERROR: Empty list")
-                if (len(reports) < number_of_reports_for_calculations):
-                    print("Error: not enough reports for " + ticker)
-                    print("Fetched " + str(len(reports)) + " out of required " + str(number_of_reports_for_calculations))
-                return reports
+            reports = con.execute(sql_recent_statements[statement_type], (ticker, date, number_of_reports_for_calculations)).fetchall()
+            if len(reports) < number_of_reports_for_calculations:
+                print(f"Error: not enough reports for {ticker}. Fetched {len(reports)} out of required {number_of_reports_for_calculations}")
+            return reports if reports else None
         except Exception as e:
             print(f"Error in get_stored_financial_statements_if_available {statement_type}: Request failed: {ticker} - {e}")
             return None
@@ -71,12 +62,3 @@ def get_stored_value_if_available(query, *params):
         try: stored_value = con.execute(query, params).fetchall()
         except Exception as e: return None
         return stored_value[0][0] if stored_value and len(stored_value) > 0 and len(stored_value[0]) > 0 else None
-
-def read_all_data_from_database():
-    for query in SQL_READING_ALL_QUERIES:
-        acc = 0
-        with sl.connect(DATABASE_PATH) as con:
-            cursor = con.execute(query)
-            print([description[0] for description in cursor.description]) # Headers
-            for row in cursor: acc += 1 # print(row)
-        print("Amount of elements: " + str(acc))

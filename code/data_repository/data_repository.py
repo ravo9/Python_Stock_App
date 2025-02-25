@@ -11,16 +11,16 @@ def retrieve_financial_statements(statement_type, number_of_reports_for_calculat
     return stored_value if stored_value is not None else fetch_financial_statements(statement_type, ticker, number_of_reports_for_calculations, number_of_reports_to_fetch, date)
 
 def retrieve_share_price_daily(company, date, date_format = DATE_FORMAT):
-    stored_value = get_stored_value_if_available(SQL_EXISTING_SHARE_PRICE, company, date) # Caching
+    stored_value = get_stored_value_if_available(SQL_EXISTING_SHARE_PRICE, company, date)
     if stored_value != None: return stored_value
     return fetch_share_price_daily(company, date, date_format)
 
 def retrieve_total_amount_of_shares_on_particular_day(company, date_str):
-    # Todo: 1. this is making problems with current date as date - delay around 10 days sometimes 2.optimise (not reason to fetch this whole table).
     date = datetime.strptime(date_str, DATE_FORMAT)
-    stored_value = get_stored_value_if_available(SQL_EXISTING_SHARES_AMOUNT, company, date) # Caching
-    if stored_value != None: return stored_value  # sometimes was spotted missing in a big dataset (when should've been already cached)
+    stored_value = get_stored_value_if_available(SQL_EXISTING_SHARES_AMOUNT, company, date)
+    if stored_value != None: return stored_value  # sometimes was spotted missing in a big dataset (when should've already been cached)
     return fetch_total_amount_of_shares_on_particular_day(company, date)
+    # Problem: issue with using current date - delay around 10 days.
 
 # UNIT TESTING
 
