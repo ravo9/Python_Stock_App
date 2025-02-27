@@ -22,33 +22,12 @@ def run_simulation(companies, start_date, end_date, period_length_in_days, numbe
 def _perform_simulation_logic(companies, start_date, end_date, period_length_in_days, number_of_reports_for_calculation, original_money = 1000):
     sub_period_dates = split_whole_period_into_chunks(start_date, end_date, period_length_in_days)
     money = original_money
-    
-    # Google Sheets Analysis
-    # average_value_for_all_companies_across_whole_period = 0.0
-    # table_data = [['Company'] + [company for company in companies] + ['Sub-Period Average']]
-    
+
     for index, (sub_period_start_date, sub_period_end_date) in enumerate(sub_period_dates):
         display_progress(index + 1, len(sub_period_dates), money)
         sub_period_weights = calculate_weights(companies, sub_period_start_date, number_of_reports_for_calculation)
 
-        # Google Sheets Analysis
-        # average_value_for_all_companies_this_sub_period = sum(value for ticker, value in sub_period_weights) / len(sub_period_weights)
-        # table_data.append([sub_period_start_date] + [value for _, value in sub_period_weights] + [average_value_for_all_companies_this_sub_period])
-        # average_value_for_all_companies_across_whole_period += average_value_for_all_companies_this_sub_period
-
         investment_change = calculate_investment_value_change(sub_period_weights, sub_period_start_date, sub_period_end_date)
         money *= (1 + investment_change)
-    
-    # Google Sheets Analysis
-    # average_value_for_all_companies_across_whole_period = average_value_for_all_companies_across_whole_period/len(sub_period_dates)
-    # table_data.append(['Whole-Period Average'] + [average_value_for_all_companies_across_whole_period])
-    # _save_to_csv(table_data)
 
     return (money - original_money)/ original_money
-
-# import csv
-# def _save_to_csv(data, file_path="../exported.csv"):
-#     with open(file_path, 'w', newline='') as file:
-#         writer = csv.writer(file)
-#         writer.writerows(data)
-#     print(f"Data has been successfully saved to '{file_path}'.")
