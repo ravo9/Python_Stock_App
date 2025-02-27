@@ -16,7 +16,7 @@ calculate_change_in_share_price = lambda first_day_price, last_day_price: (last_
 def find_out_value_per_dollar_spent_today(companies, date, number_of_reports_in_calculations):
     for item in sorted(calculate_weights(companies, date, number_of_reports_in_calculations), key=lambda x: x[1], reverse=True): print(item)
 
-def calculate_average_share_price_change_for_given_companies_in_given_period(companies_tickers, start_date, end_date):
+def calculate_average_share_price_change(companies_tickers, start_date, end_date):
     sum_of_changes = 0.0
     for company in companies_tickers:
         first_day_price = retrieve_share_price_daily(company, start_date)
@@ -93,7 +93,7 @@ def calculate_value_by_free_cash_flow(number_of_reports_for_calculation, ticker,
 #             [(200, 240)]   # Second company: 20% increase
 #         ]
 #         companies = ['COMPANY_A', 'COMPANY_B']
-#         average_change = calculate_average_share_price_change_for_given_companies_in_given_period(companies, '2021-01-01', '2021-01-31')
+#         average_change = calculate_average_share_price_change(companies, '2021-01-01', '2021-01-31')
 #         self.assertAlmostEqual(average_change, 0.15, places=2) # Expecting 15% average increase
 
 #     @patch('simulation_logic.calculation_utils.retrieve_share_prices_per_period')
@@ -104,5 +104,5 @@ def calculate_value_by_free_cash_flow(number_of_reports_for_calculation, ticker,
 #             [(200,), (200,)]   # Second company: No change
 #         ]
 #         companies = ['COMPANY_A', 'COMPANY_B']
-#         average_change = calculate_average_share_price_change_for_given_companies_in_given_period(companies, '2021-01-01', '2021-01-31')
+#         average_change = calculate_average_share_price_change(companies, '2021-01-01', '2021-01-31')
 #         self.assertEqual(average_change, 0)  # Expecting 0% change
