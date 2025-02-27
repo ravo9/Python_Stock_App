@@ -41,11 +41,8 @@ def get_stored_financial_statements_if_available(statement_type, number_of_repor
     with sl.connect(DATABASE_PATH) as con:
         try:
             reports = con.execute(sql_recent_statements[statement_type], (ticker, date, number_of_reports_for_calculations)).fetchall()
-            if len(reports) < number_of_reports_for_calculations:
-                print(f"Error: not enough reports for {ticker}. Fetched {len(reports)} out of required {number_of_reports_for_calculations}")
             return reports if reports else None
         except Exception as e:
-            print(f"Error in get_stored_financial_statements_if_available {statement_type}: Request failed: {ticker} - {e}")
             return None
 
 def get_stored_financial_statements_raw(statement_type, ticker, date, number_of_reports_for_calculations):

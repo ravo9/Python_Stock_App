@@ -25,6 +25,7 @@ def fetch_financial_statements(statement_type, ticker, number_of_reports_for_cal
         recent_reports = get_stored_financial_statements_raw(statement_type, ticker, date, number_of_reports_for_calculations)
         if not recent_reports: raise ValueError("ERROR: Empty list")
         return recent_reports
+        # Todo: here we should check if amount of reports is sufficient.
     except Exception as e: print(f"Error fetch_financial_statements {statement_type} : Request failed: {ticker} - {e}")
 
 def fetch_share_price_daily(company, date, date_format = "%Y-%m-%d"):
