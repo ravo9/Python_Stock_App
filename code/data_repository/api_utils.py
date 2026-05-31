@@ -6,9 +6,9 @@ import requests
 import os
 import json
 
-API_ENDPOINT_CASH_FLOW_STATEMENTS = "https://financialmodelingprep.com/api/v3/cash-flow-statement/"
-API_ENDPOINT_INCOME_STATEMENTS = "https://financialmodelingprep.com/api/v3/income-statement/"
-API_ENDPOINT_BALANCE_SHEETS = "https://financialmodelingprep.com/api/v3/balance-sheet-statement/"
+API_ENDPOINT_CASH_FLOW_STATEMENTS = "https://financialmodelingprep.com/stable/cash-flow-statement/"
+API_ENDPOINT_INCOME_STATEMENTS = "https://financialmodelingprep.com/stable/income-statement/"
+API_ENDPOINT_BALANCE_SHEETS = "https://financialmodelingprep.com/stable/balance-sheet-statement/"
 API_KEY = "ee22bac37cfc64407760039b37d56065"
 
 def fetch_financial_statements(statement_type, ticker, number_of_reports_for_calculations, number_of_reports_to_fetch, date):
@@ -19,7 +19,7 @@ def fetch_financial_statements(statement_type, ticker, number_of_reports_for_cal
     }
     try:
         print(f"DOWNLOADING {statement_type.replace('_', ' ').upper()} FOR: {ticker}")
-        response = requests.get((api_endpoints[statement_type] + ticker), params={"apikey": API_KEY, "period": "quarterly"})
+        response = requests.get(api_endpoints[statement_type], params={"symbol": ticker, "apikey": API_KEY, "period": "quarterly", "limit": number_of_reports_to_fetch})
         if response.ok: save_financial_statements_data(statement_type, response.json(), ticker)
         else: print(f"Error fetching data: {ticker}: {response.status_code} - {response.reason}")
         recent_reports = get_stored_financial_statements_raw(statement_type, ticker, date, number_of_reports_for_calculations)
@@ -45,7 +45,7 @@ def fetch_total_amount_of_shares_on_particular_day(company, date):
     for attempt in range(3):
         try:
             # Todo: optimise - cache whole downloaded table
-            value = yf.Ticker(company).get_shares_full(start=date)[0] # Throws exception if no data found
+            value = yf.Ticker(company).get_shares_full(start=date).iloc[0]
             # findSplits(company, yf.Ticker(company))
             save_data_to_database(SQL_CREATE_SHARES_AMOUNT, SQL_INSERT_SHARES_AMOUNT, company, date, int(value)) # Caching
             return value

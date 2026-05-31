@@ -9,7 +9,7 @@ from .date_utils import split_whole_period_into_chunks
 from data_repository.data_repository import retrieve_financial_statements, retrieve_share_price_daily, retrieve_total_amount_of_shares_on_particular_day
 
 ATTRIBUTE_OF_DECISION_INDEX = 2
-NUMBER_OF_REPORTS_TO_FETCH_FROM_API = 6 # Not used at the moment
+NUMBER_OF_REPORTS_TO_FETCH_FROM_API = 20
 
 calculate_change_in_share_price = lambda first_day_price, last_day_price: (last_day_price - first_day_price)/first_day_price
 

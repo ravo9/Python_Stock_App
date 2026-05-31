@@ -25,7 +25,7 @@ def _initialize_database(SQL_):
 
 def save_financial_statements_data(statement_type, financial_data, ticker, tested_property='freeCashFlow'):
     for report in financial_data:
-        date = report['filing_date'] if 'filing_date' in report else report['date']
+        date = report.get('filingDate') or report.get('filing_date') or report['date']
         if statement_type == 'cash_flow_statement': save_data_to_database(SQL_CREATE_CASH_FLOW_STATEMENT, SQL_INSERT_CASH_FLOW_STATEMENT, ticker, date, report[tested_property])
         elif statement_type == 'income_statement': save_data_to_database(SQL_CREATE_INCOME_STATEMENT, SQL_INSERT_INCOME_STATEMENT, ticker, date, report['interestExpense'])
         elif statement_type == 'balance_sheet': save_data_to_database(SQL_CREATE_BALANCE_SHEET, SQL_INSERT_BALANCE_SHEET, ticker, date, report['totalDebt'])
